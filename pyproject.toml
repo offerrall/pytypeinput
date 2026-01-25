@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytypeinput"
+version = "0.1.0"
+description = "Type hints → UI metadata. Build forms from Python function signatures."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Beltrán Offerrall"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+html = [
+    "jinja2>=3.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/offerrall/pytypeinput"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pytypeinput"]
