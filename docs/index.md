@@ -40,7 +40,7 @@ print(params[2].optional)       # OptionalMetadata(enabled=False)
 
 The HTML renderer generates this interactive form from the User class:
 
-<iframe src="../demos/user_form.html" 
+<iframe src="./demos/user_form.html" 
         width="100%" 
         height="400" 
         frameborder="0"
