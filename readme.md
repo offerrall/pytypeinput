@@ -50,22 +50,22 @@ pip install pytypeinput[html]
 
 ## Documentation
 
-**[Complete Documentation](https://pytypeinput.readthedocs.io)** with interactive examples
+**[Complete Documentation](https://offerrall.github.io/pytypeinput)** with interactive examples
 
 **Type System:**
-- **[Basic Types](https://pytypeinput.readthedocs.io/basic-types/)**: `int`, `float`, `str`, `bool`, `date`, `time`
-- **[Special Types](https://pytypeinput.readthedocs.io/special-types/)**: `Email`, `Color`, `File`, `ImageFile`, etc.
-- **[Lists](https://pytypeinput.readthedocs.io/lists/)**: `list[Type]` with item and list-level validation
-- **[Optionals](https://pytypeinput.readthedocs.io/optionals/)**: `Type | None` with toggle switches
-- **[Choices](https://pytypeinput.readthedocs.io/choices/)**: `Literal`, `Enum`, `Dropdown(func)`
-- **[Constraints](https://pytypeinput.readthedocs.io/constraints/)**: `Field(min=, max=, pattern=)` for validation
-- **[UI Metadata](https://pytypeinput.readthedocs.io/ui-metadata/)**: Custom labels, descriptions, placeholders, sliders, etc.
+- **[Basic Types](https://offerrall.github.io/pytypeinput/basic-types/)**: `int`, `float`, `str`, `bool`, `date`, `time`
+- **[Special Types](https://offerrall.github.io/pytypeinput/special-types/)**: `Email`, `Color`, `File`, `ImageFile`, etc.
+- **[Lists](https://offerrall.github.io/pytypeinput/lists/)**: `list[Type]` with item and list-level validation
+- **[Optionals](https://offerrall.github.io/pytypeinput/optionals/)**: `Type | None` with toggle switches
+- **[Choices](https://offerrall.github.io/pytypeinput/choices/)**: `Literal`, `Enum`, `Dropdown(func)`
+- **[Constraints](https://offerrall.github.io/pytypeinput/constraints/)**: `Field(min=, max=, pattern=)` for validation
+- **[UI Metadata](https://offerrall.github.io/pytypeinput/ui-metadata/)**: Custom labels, descriptions, placeholders, sliders, etc.
 
 **Renderers:**
-- **[HTML Renderer](https://pytypeinput.readthedocs.io/html-renderer/)** - Generate forms with client-side validation
+- **[HTML Renderer](https://offerrall.github.io/pytypeinput/html-renderer/)** - Generate forms with client-side validation
 
 **Reference:**
-- **[API Reference](https://pytypeinput.readthedocs.io/api/)** - Complete API documentation
+- **[API Reference](https://offerrall.github.io/pytypeinput/api/)** - Complete API documentation
 
 ## What pytypeinput does
 
