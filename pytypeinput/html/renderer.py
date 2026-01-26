@@ -332,19 +332,28 @@ class HTMLRenderer:
 
     @staticmethod
     def list_css_variables() -> list[str]:
-        """List all available CSS custom properties.
+        """List all user-customizable CSS custom properties.
         
-        Returns:
-            Sorted list of CSS variable names used in default styles.
-            
-        Example:
-            >>> variables = HTMLRenderer.list_css_variables()
-            >>> print(variables)
-            ['--pytypeinput-border-radius', '--pytypeinput-input-bg', ...]
+        Returns only variables that users should customize:
+        - Variables ending in -light or -dark (theme-specific)
+        - Variables without -light/-dark suffix that don't have a pair
+        
+        Excludes internal "active" variables that auto-switch between themes.
         """
-        pattern = r'var\((--pytypeinput-[\w-]+)'
-        variables = re.findall(pattern, DEFAULT_STYLES)
-        return sorted(set(variables))
+        pattern = r'(--pytypeinput-[\w-]+)'
+        all_variables = set(re.findall(pattern, DEFAULT_STYLES))
+
+        light_vars = {v for v in all_variables if v.endswith('-light')}
+        dark_vars = {v for v in all_variables if v.endswith('-dark')}
+        other_vars = {v for v in all_variables if not (v.endswith('-light') or v.endswith('-dark'))}
+
+        light_bases = {v[:-6] for v in light_vars}
+        dark_bases = {v[:-5] for v in dark_vars}
+        has_theme_pair = light_bases & dark_bases
+        
+        customizable = light_vars | dark_vars | {v for v in other_vars if v not in has_theme_pair}
+        
+        return sorted(customizable)
 
     @staticmethod
     def get_default_styles() -> str:

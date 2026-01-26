@@ -4,15 +4,185 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LiteralNumbers Form</title>
-    <style>/* ===== BASE / FIELD ===== */
+    <style>/* ===== VARIABLES ===== */
+
+:root {
+    --pytypeinput-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --pytypeinput-field-margin: 0;
+    
+    --pytypeinput-label-color-light: #333;
+    --pytypeinput-label-color-dark: #e0e0e0;
+    
+    --pytypeinput-input-bg-light: #fff;
+    --pytypeinput-input-bg-dark: #2a2a2a;
+    --pytypeinput-input-text-light: #000;
+    --pytypeinput-input-text-dark: #e0e0e0;
+    --pytypeinput-input-border-light: #ddd;
+    --pytypeinput-input-border-dark: #444;
+    
+    --pytypeinput-input-disabled-bg-light: #f5f5f5;
+    --pytypeinput-input-disabled-bg-dark: #1a1a1a;
+    --pytypeinput-input-disabled-text-light: #999;
+    --pytypeinput-input-disabled-text-dark: #666;
+    
+    --pytypeinput-input-focus-light: #007bff;
+    --pytypeinput-input-focus-dark: #0d6efd;
+    
+    --pytypeinput-description-color-light: #666;
+    --pytypeinput-description-color-dark: #b0b0b0;
+    
+    --pytypeinput-error-color: #f44336;
+    
+    --pytypeinput-toggle-bg-light: #ccc;
+    --pytypeinput-toggle-bg-dark: #555;
+    --pytypeinput-toggle-knob: white;
+    
+    --pytypeinput-add-btn-bg-light: #007bff;
+    --pytypeinput-add-btn-bg-dark: #0d6efd;
+    --pytypeinput-add-btn-hover-light: #0056b3;
+    --pytypeinput-add-btn-hover-dark: #0b5ed7;
+    
+    --pytypeinput-remove-btn-bg: #f44336;
+    --pytypeinput-remove-btn-hover: #da190b;
+    
+    --pytypeinput-slider-track-bg-light: #ddd;
+    --pytypeinput-slider-track-bg-dark: #444;
+    --pytypeinput-slider-track-hover-light: #ccc;
+    --pytypeinput-slider-track-hover-dark: #555;
+    
+    --pytypeinput-file-list-item-border-light: #e8e8e8;
+    --pytypeinput-file-list-item-border-dark: #333;
+    --pytypeinput-file-list-item-border-hover-light: #d0d0d0;
+    --pytypeinput-file-list-item-border-hover-dark: #444;
+    
+    --pytypeinput-file-remove-btn-hover-bg-light: #f5f5f5;
+    --pytypeinput-file-remove-btn-hover-bg-dark: #333;
+    
+    --pytypeinput-scrollbar-thumb-light: #ddd;
+    --pytypeinput-scrollbar-thumb-dark: #555;
+    --pytypeinput-scrollbar-thumb-hover-light: #ccc;
+    --pytypeinput-scrollbar-thumb-hover-dark: #666;
+    
+    --pytypeinput-number-btn-hover-bg-light: #ddd;
+    --pytypeinput-number-btn-hover-bg-dark: #444;
+    
+    --pytypeinput-label-color: var(--pytypeinput-label-color-light);
+    --pytypeinput-input-bg: var(--pytypeinput-input-bg-light);
+    --pytypeinput-input-text: var(--pytypeinput-input-text-light);
+    --pytypeinput-input-border: var(--pytypeinput-input-border-light);
+    --pytypeinput-input-disabled-bg: var(--pytypeinput-input-disabled-bg-light);
+    --pytypeinput-input-disabled-text: var(--pytypeinput-input-disabled-text-light);
+    --pytypeinput-input-focus: var(--pytypeinput-input-focus-light);
+    --pytypeinput-description-color: var(--pytypeinput-description-color-light);
+    --pytypeinput-toggle-bg: var(--pytypeinput-toggle-bg-light);
+    --pytypeinput-add-btn-bg: var(--pytypeinput-add-btn-bg-light);
+    --pytypeinput-add-btn-hover: var(--pytypeinput-add-btn-hover-light);
+    --pytypeinput-slider-track-bg: var(--pytypeinput-slider-track-bg-light);
+    --pytypeinput-slider-track-hover: var(--pytypeinput-slider-track-hover-light);
+    --pytypeinput-file-list-item-border: var(--pytypeinput-file-list-item-border-light);
+    --pytypeinput-file-list-item-border-hover: var(--pytypeinput-file-list-item-border-hover-light);
+    --pytypeinput-file-remove-btn-hover-bg: var(--pytypeinput-file-remove-btn-hover-bg-light);
+    --pytypeinput-scrollbar-thumb: var(--pytypeinput-scrollbar-thumb-light);
+    --pytypeinput-scrollbar-thumb-hover: var(--pytypeinput-scrollbar-thumb-hover-light);
+    --pytypeinput-number-btn-hover-bg: var(--pytypeinput-number-btn-hover-bg-light);
+    
+    --pytypeinput-label-weight: 500;
+    --pytypeinput-focus-shadow: rgba(0, 123, 255, 0.1);
+    --pytypeinput-error-shadow: rgba(244, 67, 54, 0.1);
+    --pytypeinput-add-btn-text: #fff;
+    --pytypeinput-add-btn-border: transparent;
+    --pytypeinput-remove-btn-text: #fff;
+    --pytypeinput-remove-btn-border: transparent;
+    --pytypeinput-slider-thumb-bg: var(--pytypeinput-input-focus);
+    --pytypeinput-slider-thumb-hover: var(--pytypeinput-add-btn-hover);
+    --pytypeinput-slider-track-focus: var(--pytypeinput-slider-track-hover);
+}
+
+/* ===== DARK MODE - AUTO ===== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --pytypeinput-label-color: var(--pytypeinput-label-color-dark);
+        --pytypeinput-input-bg: var(--pytypeinput-input-bg-dark);
+        --pytypeinput-input-text: var(--pytypeinput-input-text-dark);
+        --pytypeinput-input-border: var(--pytypeinput-input-border-dark);
+        --pytypeinput-input-disabled-bg: var(--pytypeinput-input-disabled-bg-dark);
+        --pytypeinput-input-disabled-text: var(--pytypeinput-input-disabled-text-dark);
+        --pytypeinput-input-focus: var(--pytypeinput-input-focus-dark);
+        --pytypeinput-description-color: var(--pytypeinput-description-color-dark);
+        --pytypeinput-toggle-bg: var(--pytypeinput-toggle-bg-dark);
+        --pytypeinput-add-btn-bg: var(--pytypeinput-add-btn-bg-dark);
+        --pytypeinput-add-btn-hover: var(--pytypeinput-add-btn-hover-dark);
+        --pytypeinput-slider-track-bg: var(--pytypeinput-slider-track-bg-dark);
+        --pytypeinput-slider-track-hover: var(--pytypeinput-slider-track-hover-dark);
+        --pytypeinput-file-list-item-border: var(--pytypeinput-file-list-item-border-dark);
+        --pytypeinput-file-list-item-border-hover: var(--pytypeinput-file-list-item-border-hover-dark);
+        --pytypeinput-file-remove-btn-hover-bg: var(--pytypeinput-file-remove-btn-hover-bg-dark);
+        --pytypeinput-scrollbar-thumb: var(--pytypeinput-scrollbar-thumb-dark);
+        --pytypeinput-scrollbar-thumb-hover: var(--pytypeinput-scrollbar-thumb-hover-dark);
+        --pytypeinput-number-btn-hover-bg: var(--pytypeinput-number-btn-hover-bg-dark);
+    }
+}
+
+/* ===== LIGHT MODE - MANUAL ===== */
+
+[data-theme="light"],
+.light-mode {
+    --pytypeinput-label-color: var(--pytypeinput-label-color-light);
+    --pytypeinput-input-bg: var(--pytypeinput-input-bg-light);
+    --pytypeinput-input-text: var(--pytypeinput-input-text-light);
+    --pytypeinput-input-border: var(--pytypeinput-input-border-light);
+    --pytypeinput-input-disabled-bg: var(--pytypeinput-input-disabled-bg-light);
+    --pytypeinput-input-disabled-text: var(--pytypeinput-input-disabled-text-light);
+    --pytypeinput-input-focus: var(--pytypeinput-input-focus-light);
+    --pytypeinput-description-color: var(--pytypeinput-description-color-light);
+    --pytypeinput-toggle-bg: var(--pytypeinput-toggle-bg-light);
+    --pytypeinput-add-btn-bg: var(--pytypeinput-add-btn-bg-light);
+    --pytypeinput-add-btn-hover: var(--pytypeinput-add-btn-hover-light);
+    --pytypeinput-slider-track-bg: var(--pytypeinput-slider-track-bg-light);
+    --pytypeinput-slider-track-hover: var(--pytypeinput-slider-track-hover-light);
+    --pytypeinput-file-list-item-border: var(--pytypeinput-file-list-item-border-light);
+    --pytypeinput-file-list-item-border-hover: var(--pytypeinput-file-list-item-border-hover-light);
+    --pytypeinput-file-remove-btn-hover-bg: var(--pytypeinput-file-remove-btn-hover-bg-light);
+    --pytypeinput-scrollbar-thumb: var(--pytypeinput-scrollbar-thumb-light);
+    --pytypeinput-scrollbar-thumb-hover: var(--pytypeinput-scrollbar-thumb-hover-light);
+    --pytypeinput-number-btn-hover-bg: var(--pytypeinput-number-btn-hover-bg-light);
+}
+
+/* ===== DARK MODE - MANUAL ===== */
+
+[data-theme="dark"],
+.dark-mode {
+    --pytypeinput-label-color: var(--pytypeinput-label-color-dark);
+    --pytypeinput-input-bg: var(--pytypeinput-input-bg-dark);
+    --pytypeinput-input-text: var(--pytypeinput-input-text-dark);
+    --pytypeinput-input-border: var(--pytypeinput-input-border-dark);
+    --pytypeinput-input-disabled-bg: var(--pytypeinput-input-disabled-bg-dark);
+    --pytypeinput-input-disabled-text: var(--pytypeinput-input-disabled-text-dark);
+    --pytypeinput-input-focus: var(--pytypeinput-input-focus-dark);
+    --pytypeinput-description-color: var(--pytypeinput-description-color-dark);
+    --pytypeinput-toggle-bg: var(--pytypeinput-toggle-bg-dark);
+    --pytypeinput-add-btn-bg: var(--pytypeinput-add-btn-bg-dark);
+    --pytypeinput-add-btn-hover: var(--pytypeinput-add-btn-hover-dark);
+    --pytypeinput-slider-track-bg: var(--pytypeinput-slider-track-bg-dark);
+    --pytypeinput-slider-track-hover: var(--pytypeinput-slider-track-hover-dark);
+    --pytypeinput-file-list-item-border: var(--pytypeinput-file-list-item-border-dark);
+    --pytypeinput-file-list-item-border-hover: var(--pytypeinput-file-list-item-border-hover-dark);
+    --pytypeinput-file-remove-btn-hover-bg: var(--pytypeinput-file-remove-btn-hover-bg-dark);
+    --pytypeinput-scrollbar-thumb: var(--pytypeinput-scrollbar-thumb-dark);
+    --pytypeinput-scrollbar-thumb-hover: var(--pytypeinput-scrollbar-thumb-hover-dark);
+    --pytypeinput-number-btn-hover-bg: var(--pytypeinput-number-btn-hover-bg-dark);
+}
+
+/* ===== BASE / FIELD ===== */
 
 .pytypeinput-field {
-    margin-bottom: var(--pytypeinput-field-margin, 1.5rem);
-    font-family: var(--pytypeinput-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
+    margin-bottom: var(--pytypeinput-field-margin);
+    font-family: var(--pytypeinput-font-family);
 }
 
 .pytypeinput-field--error .pytypeinput-label {
-    color: var(--pytypeinput-error-color, #f44336);
+    color: var(--pytypeinput-error-color);
 }
 
 /* ===== LABELS / HEADERS ===== */
@@ -20,9 +190,9 @@
 .pytypeinput-label {
     display: block;
     margin-bottom: 0.5rem;
-    font-weight: var(--pytypeinput-label-weight, 500);
-    color: var(--pytypeinput-label-color, #333);
-    font-family: var(--pytypeinput-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
+    font-weight: var(--pytypeinput-label-weight);
+    color: var(--pytypeinput-label-color);
+    font-family: var(--pytypeinput-font-family);
 }
 
 .pytypeinput-optional-header {
@@ -42,10 +212,10 @@
     width: 100%;
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
-    font-family: var(--pytypeinput-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
-    background: var(--pytypeinput-input-bg, #fff);
-    color: var(--pytypeinput-input-text, #000);
-    border: 1px solid var(--pytypeinput-input-border, #ddd);
+    font-family: var(--pytypeinput-font-family);
+    background: var(--pytypeinput-input-bg);
+    color: var(--pytypeinput-input-text);
+    border: 1px solid var(--pytypeinput-input-border);
     border-radius: 4px;
     box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -63,42 +233,42 @@
 }
 
 .pytypeinput-input:disabled {
-    background: var(--pytypeinput-input-disabled-bg, #f5f5f5);
-    color: var(--pytypeinput-input-disabled-text, #999);
+    background: var(--pytypeinput-input-disabled-bg);
+    color: var(--pytypeinput-input-disabled-text);
     cursor: not-allowed;
 }
 
 .pytypeinput-input:focus {
     outline: none;
-    border-color: var(--pytypeinput-input-focus, #4CAF50);
-    box-shadow: 0 0 0 3px var(--pytypeinput-focus-shadow, rgba(76, 175, 80, 0.1));
+    border-color: var(--pytypeinput-input-focus);
+    box-shadow: 0 0 0 3px var(--pytypeinput-focus-shadow);
 }
 
 .pytypeinput-input--error {
-    border-color: var(--pytypeinput-error-color, #f44336);
+    border-color: var(--pytypeinput-error-color);
 }
 
 .pytypeinput-input--error:focus {
-    border-color: var(--pytypeinput-error-color, #f44336);
-    box-shadow: 0 0 0 3px var(--pytypeinput-error-shadow, rgba(244, 67, 54, 0.1));
+    border-color: var(--pytypeinput-error-color);
+    box-shadow: 0 0 0 3px var(--pytypeinput-error-shadow);
 }
 
 .pytypeinput-input:-webkit-autofill,
 .pytypeinput-input:-webkit-autofill:hover,
 .pytypeinput-input:-webkit-autofill:focus,
 .pytypeinput-input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px var(--pytypeinput-input-bg, #fff) inset !important;
-    -webkit-text-fill-color: var(--pytypeinput-input-text, #000) !important;
+    -webkit-box-shadow: 0 0 0 30px var(--pytypeinput-input-bg) inset !important;
+    -webkit-text-fill-color: var(--pytypeinput-input-text) !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 
 /* ===== ERRORS ===== */
 
 .pytypeinput-error {
-    color: var(--pytypeinput-error-color, #f44336);
+    color: var(--pytypeinput-error-color);
     font-size: 0.875rem;
     margin-top: 0.25rem;
-    font-family: var(--pytypeinput-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
+    font-family: var(--pytypeinput-font-family);
 }
 
 /* ===== OPTIONAL TOGGLE ===== */
@@ -133,7 +303,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: var(--pytypeinput-toggle-bg);
     transition: .3s;
     border-radius: 24px;
 }
@@ -145,13 +315,13 @@
     width: 18px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
+    background-color: var(--pytypeinput-toggle-knob);
     transition: .3s;
     border-radius: 50%;
 }
 
 .pytypeinput-toggle-switch input:checked + .pytypeinput-toggle-slider {
-    background-color: var(--pytypeinput-input-focus, #4CAF50);
+    background-color: var(--pytypeinput-input-focus);
 }
 
 .pytypeinput-toggle-switch input:checked + .pytypeinput-toggle-slider:before {
@@ -196,9 +366,9 @@
     width: 2rem;
     height: 2rem;
     padding: 0;
-    background: var(--pytypeinput-add-btn-bg, #4CAF50);
-    color: var(--pytypeinput-add-btn-text, #fff);
-    border: 1px solid var(--pytypeinput-add-btn-border, transparent);
+    background: var(--pytypeinput-add-btn-bg);
+    color: var(--pytypeinput-add-btn-text);
+    border: 1px solid var(--pytypeinput-add-btn-border);
     border-radius: 4px;
     cursor: pointer;
     font-size: 1.25rem;
@@ -208,7 +378,7 @@
 }
 
 .pytypeinput-list-add-btn:hover {
-    background: var(--pytypeinput-add-btn-hover, #45a049);
+    background: var(--pytypeinput-add-btn-hover);
     transform: translateY(-1px);
 }
 
@@ -225,9 +395,9 @@
     width: 2rem;
     height: 2rem;
     padding: 0;
-    color: var(--pytypeinput-remove-btn-text, #fff);
-    background: var(--pytypeinput-remove-btn-bg, #f44336);
-    border: 1px solid var(--pytypeinput-remove-btn-border, transparent);
+    color: var(--pytypeinput-remove-btn-text);
+    background: var(--pytypeinput-remove-btn-bg);
+    border: 1px solid var(--pytypeinput-remove-btn-border);
     border-radius: 4px;
     cursor: pointer;
     font-size: 1.25rem;
@@ -236,7 +406,7 @@
 }
 
 .pytypeinput-list-remove:hover {
-    background: var(--pytypeinput-remove-btn-hover, #da190b);
+    background: var(--pytypeinput-remove-btn-hover);
     transform: translateY(-1px);
 }
 
@@ -268,8 +438,8 @@
     display: flex;
     flex-direction: column;
     width: 2rem;
-    border-left: 1px solid var(--pytypeinput-input-border, #ddd);
-    background: var(--pytypeinput-input-bg, #fff);
+    border-left: 1px solid var(--pytypeinput-input-border);
+    background: var(--pytypeinput-input-bg);
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     overflow: hidden;
@@ -284,7 +454,7 @@
     border: none;
     cursor: pointer;
     font-size: 0.625rem;
-    color: var(--pytypeinput-label-color, #333);
+    color: var(--pytypeinput-label-color);
     transition: background 0.2s;
     display: flex;
     align-items: center;
@@ -292,31 +462,31 @@
 }
 
 .pytypeinput-number-btn:hover {
-    background: var(--pytypeinput-input-border, #ddd);
+    background: var(--pytypeinput-number-btn-hover-bg);
 }
 
 .pytypeinput-number-btn:active {
-    background: var(--pytypeinput-input-focus, #4CAF50);
+    background: var(--pytypeinput-input-focus);
     color: white;
 }
 
 .pytypeinput-number-up {
-    border-bottom: 1px solid var(--pytypeinput-input-border, #ddd);
+    border-bottom: 1px solid var(--pytypeinput-input-border);
 }
 
 .pytypeinput-input--error + .pytypeinput-number-controls {
-    border-left-color: var(--pytypeinput-error-color, #f44336);
-    background: var(--pytypeinput-input-bg, #fff);
+    border-left-color: var(--pytypeinput-error-color);
+    background: var(--pytypeinput-input-bg);
 }
 
 .pytypeinput-input:focus + .pytypeinput-number-controls {
-    border-left-color: var(--pytypeinput-input-focus, #4CAF50);
-    background: var(--pytypeinput-input-bg, #fff);
+    border-left-color: var(--pytypeinput-input-focus);
+    background: var(--pytypeinput-input-bg);
 }
 
 .pytypeinput-input--error:focus + .pytypeinput-number-controls {
-    border-left-color: var(--pytypeinput-error-color, #f44336);
-    background: var(--pytypeinput-input-bg, #fff);
+    border-left-color: var(--pytypeinput-error-color);
+    background: var(--pytypeinput-input-bg);
 }
 
 /* ===== SLIDER ===== */
@@ -335,83 +505,80 @@
     width: 100%;
     height: 6px;
     border-radius: 3px;
-    background: var(--pytypeinput-slider-track-bg, #ddd);
+    background: var(--pytypeinput-slider-track-bg);
     outline: none;
     transition: background 0.2s;
 }
 
 .pytypeinput-slider:hover {
-    background: var(--pytypeinput-slider-track-hover, #ccc);
+    background: var(--pytypeinput-slider-track-hover);
 }
 
 .pytypeinput-slider:focus {
     outline: none;
-    background: var(--pytypeinput-slider-track-focus, #ccc);
+    background: var(--pytypeinput-slider-track-focus);
 }
 
-/* Webkit (Chrome, Safari, Edge) */
 .pytypeinput-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--pytypeinput-slider-thumb-bg, #4CAF50);
+    background: var(--pytypeinput-slider-thumb-bg);
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .pytypeinput-slider::-webkit-slider-thumb:hover {
-    background: var(--pytypeinput-slider-thumb-hover, #45a049);
+    background: var(--pytypeinput-slider-thumb-hover);
     transform: scale(1.1);
 }
 
 .pytypeinput-slider::-webkit-slider-thumb:active {
     transform: scale(1.2);
-    box-shadow: 0 0 0 4px var(--pytypeinput-focus-shadow, rgba(76, 175, 80, 0.2));
+    box-shadow: 0 0 0 4px var(--pytypeinput-focus-shadow);
 }
 
-/* Firefox */
 .pytypeinput-slider::-moz-range-thumb {
     width: 18px;
     height: 18px;
     border: none;
     border-radius: 50%;
-    background: var(--pytypeinput-slider-thumb-bg, #4CAF50);
+    background: var(--pytypeinput-slider-thumb-bg);
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .pytypeinput-slider::-moz-range-thumb:hover {
-    background: var(--pytypeinput-slider-thumb-hover, #45a049);
+    background: var(--pytypeinput-slider-thumb-hover);
     transform: scale(1.1);
 }
 
 .pytypeinput-slider::-moz-range-thumb:active {
     transform: scale(1.2);
-    box-shadow: 0 0 0 4px var(--pytypeinput-focus-shadow, rgba(76, 175, 80, 0.2));
+    box-shadow: 0 0 0 4px var(--pytypeinput-focus-shadow);
 }
 
 .pytypeinput-slider::-moz-range-track {
     height: 6px;
     border-radius: 3px;
-    background: var(--pytypeinput-slider-track-bg, #ddd);
+    background: var(--pytypeinput-slider-track-bg);
 }
 
-/* Output value display */
 .pytypeinput-slider-value {
     min-width: 3rem;
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--pytypeinput-label-color, #333);
-    background: var(--pytypeinput-input-bg, #f5f5f5);
-    border: 1px solid var(--pytypeinput-input-border, #ddd);
+    color: var(--pytypeinput-label-color);
+    background: var(--pytypeinput-input-bg);
+    border: 1px solid var(--pytypeinput-input-border);
     border-radius: 4px;
     text-align: center;
-    font-family: var(--pytypeinput-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
+    font-family: var(--pytypeinput-font-family);
 }
 
 /* ===== COLOR INPUT ===== */
@@ -442,10 +609,10 @@
     width: 100%;
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
-    font-family: var(--pytypeinput-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
-    background: var(--pytypeinput-input-bg, #fff);
-    color: var(--pytypeinput-input-text, #000);
-    border: 1px solid var(--pytypeinput-input-border, #ddd);
+    font-family: var(--pytypeinput-font-family);
+    background: var(--pytypeinput-input-bg);
+    color: var(--pytypeinput-input-text);
+    border: 1px solid var(--pytypeinput-input-border);
     border-radius: 4px;
     box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -454,13 +621,13 @@
 
 .pytypeinput-select:focus {
     outline: none;
-    border-color: var(--pytypeinput-input-focus, #4CAF50);
-    box-shadow: 0 0 0 3px var(--pytypeinput-focus-shadow, rgba(76, 175, 80, 0.1));
+    border-color: var(--pytypeinput-input-focus);
+    box-shadow: 0 0 0 3px var(--pytypeinput-focus-shadow);
 }
 
 .pytypeinput-select:disabled {
-    background: var(--pytypeinput-input-disabled-bg, #f5f5f5);
-    color: var(--pytypeinput-input-disabled-text, #999);
+    background: var(--pytypeinput-input-disabled-bg);
+    color: var(--pytypeinput-input-disabled-text);
     cursor: not-allowed;
 }
 
@@ -486,21 +653,21 @@
 .pytypeinput-file-input-wrapper .pytypeinput-input[type="file"]::file-selector-button {
     padding: 0.375rem 0.875rem;
     margin-right: 0.75rem;
-    background: var(--pytypeinput-input-bg, #fff);
-    color: var(--pytypeinput-label-color, #333);
-    border: 1px solid var(--pytypeinput-input-border, #ddd);
+    background: var(--pytypeinput-input-bg);
+    color: var(--pytypeinput-label-color);
+    border: 1px solid var(--pytypeinput-input-border);
     border-radius: 4px;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
-    font-family: var(--pytypeinput-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
+    font-family: var(--pytypeinput-font-family);
 }
 
 .pytypeinput-file-input-wrapper .pytypeinput-input[type="file"]::file-selector-button:hover {
-    background: var(--pytypeinput-input-focus, #4CAF50);
+    background: var(--pytypeinput-input-focus);
     color: white;
-    border-color: var(--pytypeinput-input-focus, #4CAF50);
+    border-color: var(--pytypeinput-input-focus);
 }
 
 .pytypeinput-file-add-more-btn {
@@ -508,7 +675,7 @@
     min-width: 2.5rem;
     padding: 0;
     margin: 0;
-    background: var(--pytypeinput-input-focus, #4CAF50);
+    background: var(--pytypeinput-input-focus);
     color: white;
     border: none;
     border-radius: 4px;
@@ -520,7 +687,7 @@
 }
 
 .pytypeinput-file-add-more-btn:hover {
-    background: var(--pytypeinput-add-btn-hover, #45a049);
+    background: var(--pytypeinput-add-btn-hover);
 }
 
 .pytypeinput-file-add-more-btn:active {
@@ -543,7 +710,7 @@
     max-height: 200px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #ddd transparent;
+    scrollbar-color: var(--pytypeinput-scrollbar-thumb) transparent;
 }
 
 .pytypeinput-file-list::-webkit-scrollbar {
@@ -555,12 +722,12 @@
 }
 
 .pytypeinput-file-list::-webkit-scrollbar-thumb {
-    background: #ddd;
+    background: var(--pytypeinput-scrollbar-thumb);
     border-radius: 2px;
 }
 
 .pytypeinput-file-list::-webkit-scrollbar-thumb:hover {
-    background: #ccc;
+    background: var(--pytypeinput-scrollbar-thumb-hover);
 }
 
 .pytypeinput-file-list-item {
@@ -569,15 +736,15 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.5rem 0.625rem;
-    background: var(--pytypeinput-input-bg, #fff);
-    border: 1px solid var(--pytypeinput-input-border, #e8e8e8);
+    background: var(--pytypeinput-input-bg);
+    border: 1px solid var(--pytypeinput-file-list-item-border);
     border-radius: 4px;
     flex-shrink: 0;
     transition: border-color 0.15s ease;
 }
 
 .pytypeinput-file-list-item:hover {
-    border-color: #d0d0d0;
+    border-color: var(--pytypeinput-file-list-item-border-hover);
 }
 
 .pytypeinput-file-info {
@@ -594,18 +761,18 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.8125rem;
-    color: var(--pytypeinput-label-color, #333);
+    color: var(--pytypeinput-label-color);
 }
 
 .pytypeinput-file-size {
-    color: var(--pytypeinput-label-color, #999);
+    color: var(--pytypeinput-description-color);
     font-size: 0.6875rem;
 }
 
 .pytypeinput-file-remove-btn {
     background: transparent;
     border: none;
-    color: #999;
+    color: var(--pytypeinput-description-color);
     font-size: 1.125rem;
     cursor: pointer;
     padding: 0.25rem;
@@ -622,8 +789,8 @@
 }
 
 .pytypeinput-file-remove-btn:hover {
-    background: #f5f5f5;
-    color: var(--pytypeinput-error-color, #f44336);
+    background: var(--pytypeinput-file-remove-btn-hover-bg);
+    color: var(--pytypeinput-error-color);
 }
 
 /* ===== DESCRIPTION ===== */
@@ -632,9 +799,9 @@
     display: block;
     margin-top: 0.375rem;
     font-size: 0.875rem;
-    color: var(--pytypeinput-description-color, #666);
+    color: var(--pytypeinput-description-color);
     line-height: 1.4;
-    font-family: var(--pytypeinput-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
+    font-family: var(--pytypeinput-font-family);
 }</style>
     <style>
         body {
@@ -642,6 +809,9 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             max-width: 600px;
             margin: 0 auto;
+            background: var(--pytypeinput-input-bg, #fff);
+            color: var(--pytypeinput-input-text, #000);
+            transition: background-color 0.2s, color 0.2s;
         }
     </style>
 </head>
