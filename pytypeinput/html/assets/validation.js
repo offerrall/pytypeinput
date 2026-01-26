@@ -93,11 +93,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 errorEl = document.createElement('div');
                 errorEl.className = 'pytypeinput-error';
                 
-                const wrapper = input.closest('.pytypeinput-number-wrapper');
-                if (wrapper) {
-                    wrapper.after(errorEl);
+                if (isListItem) {
+                    const listItemWrapper = container.closest('.pytypeinput-list-item-wrapper');
+                    if (listItemWrapper) {
+                        listItemWrapper.appendChild(errorEl);
+                    } else {
+                        const wrapper = input.closest('.pytypeinput-number-wrapper');
+                        if (wrapper) {
+                            wrapper.after(errorEl);
+                        } else {
+                            input.after(errorEl);
+                        }
+                    }
                 } else {
-                    input.after(errorEl);
+                    const wrapper = input.closest('.pytypeinput-number-wrapper');
+                    if (wrapper) {
+                        wrapper.after(errorEl);
+                    } else {
+                        input.after(errorEl);
+                    }
                 }
             }
             
@@ -115,8 +129,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 input.classList.remove('pytypeinput-input--error');
             }
             
-            const errorEl = container.querySelector('.pytypeinput-error');
-            errorEl?.remove();
+            if (isListItem) {
+                const listItemWrapper = container.closest('.pytypeinput-list-item-wrapper');
+                if (listItemWrapper) {
+                    const errorEl = listItemWrapper.querySelector('.pytypeinput-error');
+                    errorEl?.remove();
+                }
+            } else {
+                const errorEl = container.querySelector('.pytypeinput-error');
+                errorEl?.remove();
+            }
         }
     };
     
@@ -371,8 +393,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            const firstItem = this.container.querySelector('.pytypeinput-list-item');
-            const newItem = firstItem.cloneNode(true);
+            const firstItemWrapper = this.container.querySelector('.pytypeinput-list-item-wrapper');
+            const newItemWrapper = firstItemWrapper.cloneNode(true);
+            const newItem = newItemWrapper.querySelector('.pytypeinput-list-item');
             const input = newItem.querySelector('.pytypeinput-list-input');
             
             if (input.type === 'checkbox') {
@@ -398,8 +421,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             input.classList.remove('pytypeinput-input--error');
             
-            const content = newItem.querySelector('.pytypeinput-list-item-content');
-            content.querySelector('.pytypeinput-error')?.remove();
+            const errorEl = newItemWrapper.querySelector('.pytypeinput-error');
+            errorEl?.remove();
             
             if (input.type !== 'checkbox' && input.tagName !== 'SELECT' && input.type !== 'file') {
                 input.addEventListener('input', () => validateListItem(input));
@@ -415,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            this.container.appendChild(newItem);
+            this.container.appendChild(newItemWrapper);
             this.updateButtons();
         }
         
@@ -423,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!e.target.classList.contains('pytypeinput-list-remove')) return;
             
             if (this.container.children.length > this.minItems) {
-                e.target.closest('.pytypeinput-list-item').remove();
+                e.target.closest('.pytypeinput-list-item-wrapper').remove();
                 this.updateButtons();
             }
         }

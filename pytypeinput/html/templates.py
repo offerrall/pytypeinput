@@ -86,27 +86,29 @@ BASE_TEMPLATE = '''
 
 INT_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <div class="pytypeinput-number-wrapper">
-                <input 
-                    type="number"
-                    name="{{ name }}[]"
-                    class="pytypeinput-input pytypeinput-list-input"
-                    autocomplete="off"
-                    {%- if value is not none %} value="{{ value }}"{%- endif %}
-                    {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
-                    {%- if min is not none %} data-min="{{ min }}"{%- endif %}
-                    {%- if max is not none %} data-max="{{ max }}"{%- endif %}
-                    step="{{ step }}"
-                >
-                <div class="pytypeinput-number-controls">
-                    <button type="button" class="pytypeinput-number-btn pytypeinput-number-up">▲</button>
-                    <button type="button" class="pytypeinput-number-btn pytypeinput-number-down">▼</button>
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <div class="pytypeinput-number-wrapper">
+                    <input 
+                        type="number"
+                        name="{{ name }}[]"
+                        class="pytypeinput-input pytypeinput-list-input"
+                        autocomplete="off"
+                        {%- if value is not none %} value="{{ value }}"{%- endif %}
+                        {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
+                        {%- if min is not none %} data-min="{{ min }}"{%- endif %}
+                        {%- if max is not none %} data-max="{{ max }}"{%- endif %}
+                        step="{{ step }}"
+                    >
+                    <div class="pytypeinput-number-controls">
+                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-up">▲</button>
+                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-down">▼</button>
+                    </div>
                 </div>
             </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -137,22 +139,24 @@ DEFAULT_INT_TEMPLATE = Template(FIELD_MACROS + INT_MACROS + BASE_TEMPLATE)
 
 STR_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <input 
-                type="{{ input_type }}"
-                name="{{ name }}[]"
-                class="pytypeinput-input pytypeinput-list-input"
-                autocomplete="off"
-                {%- if value is not none %} value="{{ value }}"{%- endif %}
-                {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
-                {%- if min is not none %} minlength="{{ min }}" data-minlength="{{ min }}"{%- endif %}
-                {%- if max is not none %} maxlength="{{ max }}" data-maxlength="{{ max }}"{%- endif %}
-                {%- if pattern is not none %} pattern="{{ pattern }}" data-pattern="{{ pattern }}"{%- endif %}
-                {%- if pattern_message is not none %} data-pattern-message="{{ pattern_message }}"{%- endif %}
-            >
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <input 
+                    type="{{ input_type }}"
+                    name="{{ name }}[]"
+                    class="pytypeinput-input pytypeinput-list-input"
+                    autocomplete="off"
+                    {%- if value is not none %} value="{{ value }}"{%- endif %}
+                    {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
+                    {%- if min is not none %} minlength="{{ min }}" data-minlength="{{ min }}"{%- endif %}
+                    {%- if max is not none %} maxlength="{{ max }}" data-maxlength="{{ max }}"{%- endif %}
+                    {%- if pattern is not none %} pattern="{{ pattern }}" data-pattern="{{ pattern }}"{%- endif %}
+                    {%- if pattern_message is not none %} data-pattern-message="{{ pattern_message }}"{%- endif %}
+                >
+            </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -177,21 +181,23 @@ DEFAULT_STR_TEMPLATE = Template(FIELD_MACROS + STR_MACROS + BASE_TEMPLATE)
 
 STR_TEXTAREA_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <textarea 
-                name="{{ name }}[]"
-                class="pytypeinput-input pytypeinput-list-input"
-                autocomplete="off"
-                {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
-                {%- if min is not none %} minlength="{{ min }}" data-minlength="{{ min }}"{%- endif %}
-                {%- if max is not none %} maxlength="{{ max }}" data-maxlength="{{ max }}"{%- endif %}
-                {%- if pattern is not none %} data-pattern="{{ pattern }}"{%- endif %}
-                {%- if pattern_message is not none %} data-pattern-message="{{ pattern_message }}"{%- endif %}
-                rows="{{ rows }}"
-            >{{ value if value is not none else '' }}</textarea>
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <textarea 
+                    name="{{ name }}[]"
+                    class="pytypeinput-input pytypeinput-list-input"
+                    autocomplete="off"
+                    {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
+                    {%- if min is not none %} minlength="{{ min }}" data-minlength="{{ min }}"{%- endif %}
+                    {%- if max is not none %} maxlength="{{ max }}" data-maxlength="{{ max }}"{%- endif %}
+                    {%- if pattern is not none %} data-pattern="{{ pattern }}"{%- endif %}
+                    {%- if pattern_message is not none %} data-pattern-message="{{ pattern_message }}"{%- endif %}
+                    rows="{{ rows }}"
+                >{{ value if value is not none else '' }}</textarea>
+            </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -216,28 +222,30 @@ DEFAULT_STR_TEXTAREA_TEMPLATE = Template(FIELD_MACROS + STR_TEXTAREA_MACROS + BA
 
 FLOAT_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <div class="pytypeinput-number-wrapper">
-                <input 
-                    type="number"
-                    name="{{ name }}[]"
-                    class="pytypeinput-input pytypeinput-list-input"
-                    autocomplete="off"
-                    data-float="true"
-                    {%- if value is not none %} value="{{ value }}"{%- endif %}
-                    {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
-                    {%- if min is not none %} data-min="{{ min }}"{%- endif %}
-                    {%- if max is not none %} data-max="{{ max }}"{%- endif %}
-                    step="{{ step }}"
-                >
-                <div class="pytypeinput-number-controls">
-                    <button type="button" class="pytypeinput-number-btn pytypeinput-number-up">▲</button>
-                    <button type="button" class="pytypeinput-number-btn pytypeinput-number-down">▼</button>
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <div class="pytypeinput-number-wrapper">
+                    <input 
+                        type="number"
+                        name="{{ name }}[]"
+                        class="pytypeinput-input pytypeinput-list-input"
+                        autocomplete="off"
+                        data-float="true"
+                        {%- if value is not none %} value="{{ value }}"{%- endif %}
+                        {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
+                        {%- if min is not none %} data-min="{{ min }}"{%- endif %}
+                        {%- if max is not none %} data-max="{{ max }}"{%- endif %}
+                        step="{{ step }}"
+                    >
+                    <div class="pytypeinput-number-controls">
+                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-up">▲</button>
+                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-down">▼</button>
+                    </div>
                 </div>
             </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -268,19 +276,21 @@ DEFAULT_FLOAT_TEMPLATE = Template(FIELD_MACROS + FLOAT_MACROS + BASE_TEMPLATE)
 
 BOOL_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <label class="pytypeinput-toggle-switch">
-                <input 
-                    type="checkbox"
-                    name="{{ name }}[]"
-                    class="pytypeinput-checkbox pytypeinput-list-input"
-                    {%- if value %} checked{%- endif %}
-                >
-                <span class="pytypeinput-toggle-slider"></span>
-            </label>
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <label class="pytypeinput-toggle-switch">
+                    <input 
+                        type="checkbox"
+                        name="{{ name }}[]"
+                        class="pytypeinput-checkbox pytypeinput-list-input"
+                        {%- if value %} checked{%- endif %}
+                    >
+                    <span class="pytypeinput-toggle-slider"></span>
+                </label>
+            </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -302,23 +312,25 @@ DEFAULT_BOOL_TEMPLATE = Template(FIELD_MACROS + BOOL_MACROS + BASE_TEMPLATE)
 
 DATE_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <input 
-                type="date"
-                name="{{ name }}[]"
-                class="pytypeinput-input pytypeinput-list-input"
-                {%- if value is not none %}
-                value="{{ value }}"
-                {%- elif list_item_default is defined %}
-                value="{{ list_item_default }}"
-                {%- endif %}
-                {%- if list_item_default is defined %}
-                data-default="{{ list_item_default }}"
-                {%- endif %}
-            >
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <input 
+                    type="date"
+                    name="{{ name }}[]"
+                    class="pytypeinput-input pytypeinput-list-input"
+                    {%- if value is not none %}
+                    value="{{ value }}"
+                    {%- elif list_item_default is defined %}
+                    value="{{ list_item_default }}"
+                    {%- endif %}
+                    {%- if list_item_default is defined %}
+                    data-default="{{ list_item_default }}"
+                    {%- endif %}
+                >
+            </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -337,23 +349,25 @@ DEFAULT_DATE_TEMPLATE = Template(FIELD_MACROS + DATE_MACROS + BASE_TEMPLATE)
 
 TIME_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <input 
-                type="time"
-                name="{{ name }}[]"
-                class="pytypeinput-input pytypeinput-list-input"
-                {%- if value is not none %}
-                value="{{ value }}"
-                {%- elif list_item_default is defined %}
-                value="{{ list_item_default }}"
-                {%- endif %}
-                {%- if list_item_default is defined %}
-                data-default="{{ list_item_default }}"
-                {%- endif %}
-            >
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <input 
+                    type="time"
+                    name="{{ name }}[]"
+                    class="pytypeinput-input pytypeinput-list-input"
+                    {%- if value is not none %}
+                    value="{{ value }}"
+                    {%- elif list_item_default is defined %}
+                    value="{{ list_item_default }}"
+                    {%- endif %}
+                    {%- if list_item_default is defined %}
+                    data-default="{{ list_item_default }}"
+                    {%- endif %}
+                >
+            </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -372,18 +386,20 @@ DEFAULT_TIME_TEMPLATE = Template(FIELD_MACROS + TIME_MACROS + BASE_TEMPLATE)
 
 SELECT_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <select 
-                name="{{ name }}[]"
-                class="pytypeinput-select pytypeinput-list-input"
-            >
-                {%- for option in options %}
-                <option value="{{ option }}"{% if value == option %} selected{% endif %}>{{ option }}</option>
-                {%- endfor %}
-            </select>
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <select 
+                    name="{{ name }}[]"
+                    class="pytypeinput-select pytypeinput-list-input"
+                >
+                    {%- for option in options %}
+                    <option value="{{ option }}"{% if value == option %} selected{% endif %}>{{ option }}</option>
+                    {%- endfor %}
+                </select>
+            </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -468,24 +484,26 @@ DEFAULT_FILE_TEMPLATE = Template(FILE_MACROS + FILE_TEMPLATE)
 
 SLIDER_INT_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <div class="pytypeinput-slider-wrapper">
-                <input 
-                    type="range"
-                    name="{{ name }}[]"
-                    class="pytypeinput-slider pytypeinput-list-input"
-                    {%- if value is not none %} value="{{ value }}"{%- else %} value="{{ min if min is not none else 0 }}"{%- endif %}
-                    {%- if min is not none %} min="{{ min }}"{%- endif %}
-                    {%- if max is not none %} max="{{ max }}"{%- endif %}
-                    step="{{ step }}"
-                >
-                {%- if show_value -%}
-                <output class="pytypeinput-slider-value">{{ value if value is not none else (min if min is not none else 0) }}</output>
-                {%- endif -%}
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <div class="pytypeinput-slider-wrapper">
+                    <input 
+                        type="range"
+                        name="{{ name }}[]"
+                        class="pytypeinput-slider pytypeinput-list-input"
+                        {%- if value is not none %} value="{{ value }}"{%- else %} value="{{ min if min is not none else 0 }}"{%- endif %}
+                        {%- if min is not none %} min="{{ min }}"{%- endif %}
+                        {%- if max is not none %} max="{{ max }}"{%- endif %}
+                        step="{{ step }}"
+                    >
+                    {%- if show_value -%}
+                    <output class="pytypeinput-slider-value">{{ value if value is not none else (min if min is not none else 0) }}</output>
+                    {%- endif -%}
+                </div>
             </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 
@@ -513,25 +531,27 @@ DEFAULT_SLIDER_INT_TEMPLATE = Template(FIELD_MACROS + SLIDER_INT_MACROS + BASE_T
 
 SLIDER_FLOAT_MACROS = '''
 {%- macro render_list_item_content(value=none) -%}
-    <div class="pytypeinput-list-item">
-        <div class="pytypeinput-list-item-content">
-            <div class="pytypeinput-slider-wrapper">
-                <input 
-                    type="range"
-                    name="{{ name }}[]"
-                    class="pytypeinput-slider pytypeinput-list-input"
-                    data-float="true"
-                    {%- if value is not none %} value="{{ value }}"{%- else %} value="{{ min if min is not none else 0 }}"{%- endif %}
-                    {%- if min is not none %} min="{{ min }}"{%- endif %}
-                    {%- if max is not none %} max="{{ max }}"{%- endif %}
-                    step="{{ step }}"
-                >
-                {%- if show_value -%}
-                <output class="pytypeinput-slider-value">{{ value if value is not none else (min if min is not none else 0) }}</output>
-                {%- endif -%}
+    <div class="pytypeinput-list-item-wrapper">
+        <div class="pytypeinput-list-item">
+            <div class="pytypeinput-list-item-content">
+                <div class="pytypeinput-slider-wrapper">
+                    <input 
+                        type="range"
+                        name="{{ name }}[]"
+                        class="pytypeinput-slider pytypeinput-list-input"
+                        data-float="true"
+                        {%- if value is not none %} value="{{ value }}"{%- else %} value="{{ min if min is not none else 0 }}"{%- endif %}
+                        {%- if min is not none %} min="{{ min }}"{%- endif %}
+                        {%- if max is not none %} max="{{ max }}"{%- endif %}
+                        step="{{ step }}"
+                    >
+                    {%- if show_value -%}
+                    <output class="pytypeinput-slider-value">{{ value if value is not none else (min if min is not none else 0) }}</output>
+                    {%- endif -%}
+                </div>
             </div>
+            <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
-        <button type="button" class="pytypeinput-list-remove">×</button>
     </div>
 {%- endmacro -%}
 

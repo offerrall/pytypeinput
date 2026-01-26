@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PatternMessageDemo Form</title>
-    <style>/* ===== VARIABLES ===== */
-
-:root {
+    <style>:root {
     --pytypeinput-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     --pytypeinput-field-margin: 0;
     
@@ -98,8 +96,6 @@
     --pytypeinput-slider-track-focus: var(--pytypeinput-slider-track-hover);
 }
 
-/* ===== DARK MODE - AUTO ===== */
-
 @media (prefers-color-scheme: dark) {
     :root {
         --pytypeinput-label-color: var(--pytypeinput-label-color-dark);
@@ -124,8 +120,6 @@
     }
 }
 
-/* ===== LIGHT MODE - MANUAL ===== */
-
 [data-theme="light"],
 .light-mode {
     --pytypeinput-label-color: var(--pytypeinput-label-color-light);
@@ -148,8 +142,6 @@
     --pytypeinput-scrollbar-thumb-hover: var(--pytypeinput-scrollbar-thumb-hover-light);
     --pytypeinput-number-btn-hover-bg: var(--pytypeinput-number-btn-hover-bg-light);
 }
-
-/* ===== DARK MODE - MANUAL ===== */
 
 [data-theme="dark"],
 .dark-mode {
@@ -174,8 +166,6 @@
     --pytypeinput-number-btn-hover-bg: var(--pytypeinput-number-btn-hover-bg-dark);
 }
 
-/* ===== BASE / FIELD ===== */
-
 .pytypeinput-field {
     margin-bottom: var(--pytypeinput-field-margin);
     font-family: var(--pytypeinput-font-family);
@@ -184,8 +174,6 @@
 .pytypeinput-field--error .pytypeinput-label {
     color: var(--pytypeinput-error-color);
 }
-
-/* ===== LABELS / HEADERS ===== */
 
 .pytypeinput-label {
     display: block;
@@ -205,8 +193,6 @@
 .pytypeinput-optional-header .pytypeinput-label {
     margin-bottom: 0;
 }
-
-/* ===== INPUTS (GENERAL) ===== */
 
 .pytypeinput-input {
     width: 100%;
@@ -262,16 +248,12 @@
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* ===== ERRORS ===== */
-
 .pytypeinput-error {
     color: var(--pytypeinput-error-color);
     font-size: 0.875rem;
     margin-top: 0.25rem;
     font-family: var(--pytypeinput-font-family);
 }
-
-/* ===== OPTIONAL TOGGLE ===== */
 
 .pytypeinput-optional-content {
     transition: opacity 0.2s;
@@ -328,8 +310,6 @@
     transform: translateX(20px);
 }
 
-/* ===== LISTS ===== */
-
 .pytypeinput-list-wrapper {
     display: flex;
     flex-direction: column;
@@ -340,6 +320,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+}
+
+.pytypeinput-list-item-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .pytypeinput-list-item {
@@ -418,8 +404,6 @@
     display: none;
 }
 
-/* ===== NUMBER INPUTS ===== */
-
 .pytypeinput-number-wrapper {
     position: relative;
     width: 100%;
@@ -488,8 +472,6 @@
     border-left-color: var(--pytypeinput-error-color);
     background: var(--pytypeinput-input-bg);
 }
-
-/* ===== SLIDER ===== */
 
 .pytypeinput-slider-wrapper {
     display: flex;
@@ -581,8 +563,6 @@
     font-family: var(--pytypeinput-font-family);
 }
 
-/* ===== COLOR INPUT ===== */
-
 .pytypeinput-input[type="color"] {
     height: 2.5rem;
     padding: 0.25rem;
@@ -602,8 +582,6 @@
     border: none;
     border-radius: 3px;
 }
-
-/* ===== SELECT ===== */
 
 .pytypeinput-select {
     width: 100%;
@@ -630,8 +608,6 @@
     color: var(--pytypeinput-input-disabled-text);
     cursor: not-allowed;
 }
-
-/* ===== FILE INPUT ===== */
 
 .pytypeinput-file-input-wrapper {
     display: flex;
@@ -699,8 +675,6 @@
     cursor: not-allowed;
     background: #ccc;
 }
-
-/* ===== FILE LIST ===== */
 
 .pytypeinput-file-list {
     margin-top: 0.625rem;
@@ -792,8 +766,6 @@
     background: var(--pytypeinput-file-remove-btn-hover-bg);
     color: var(--pytypeinput-error-color);
 }
-
-/* ===== DESCRIPTION ===== */
 
 .pytypeinput-description {
     display: block;
@@ -921,11 +893,25 @@
                 errorEl = document.createElement('div');
                 errorEl.className = 'pytypeinput-error';
                 
-                const wrapper = input.closest('.pytypeinput-number-wrapper');
-                if (wrapper) {
-                    wrapper.after(errorEl);
+                if (isListItem) {
+                    const listItemWrapper = container.closest('.pytypeinput-list-item-wrapper');
+                    if (listItemWrapper) {
+                        listItemWrapper.appendChild(errorEl);
+                    } else {
+                        const wrapper = input.closest('.pytypeinput-number-wrapper');
+                        if (wrapper) {
+                            wrapper.after(errorEl);
+                        } else {
+                            input.after(errorEl);
+                        }
+                    }
                 } else {
-                    input.after(errorEl);
+                    const wrapper = input.closest('.pytypeinput-number-wrapper');
+                    if (wrapper) {
+                        wrapper.after(errorEl);
+                    } else {
+                        input.after(errorEl);
+                    }
                 }
             }
             
@@ -943,8 +929,16 @@
                 input.classList.remove('pytypeinput-input--error');
             }
             
-            const errorEl = container.querySelector('.pytypeinput-error');
-            errorEl?.remove();
+            if (isListItem) {
+                const listItemWrapper = container.closest('.pytypeinput-list-item-wrapper');
+                if (listItemWrapper) {
+                    const errorEl = listItemWrapper.querySelector('.pytypeinput-error');
+                    errorEl?.remove();
+                }
+            } else {
+                const errorEl = container.querySelector('.pytypeinput-error');
+                errorEl?.remove();
+            }
         }
     };
     
@@ -1199,8 +1193,9 @@
                 return;
             }
             
-            const firstItem = this.container.querySelector('.pytypeinput-list-item');
-            const newItem = firstItem.cloneNode(true);
+            const firstItemWrapper = this.container.querySelector('.pytypeinput-list-item-wrapper');
+            const newItemWrapper = firstItemWrapper.cloneNode(true);
+            const newItem = newItemWrapper.querySelector('.pytypeinput-list-item');
             const input = newItem.querySelector('.pytypeinput-list-input');
             
             if (input.type === 'checkbox') {
@@ -1226,8 +1221,8 @@
             
             input.classList.remove('pytypeinput-input--error');
             
-            const content = newItem.querySelector('.pytypeinput-list-item-content');
-            content.querySelector('.pytypeinput-error')?.remove();
+            const errorEl = newItemWrapper.querySelector('.pytypeinput-error');
+            errorEl?.remove();
             
             if (input.type !== 'checkbox' && input.tagName !== 'SELECT' && input.type !== 'file') {
                 input.addEventListener('input', () => validateListItem(input));
@@ -1243,7 +1238,7 @@
                 }
             }
             
-            this.container.appendChild(newItem);
+            this.container.appendChild(newItemWrapper);
             this.updateButtons();
         }
         
@@ -1251,7 +1246,7 @@
             if (!e.target.classList.contains('pytypeinput-list-remove')) return;
             
             if (this.container.children.length > this.minItems) {
-                e.target.closest('.pytypeinput-list-item').remove();
+                e.target.closest('.pytypeinput-list-item-wrapper').remove();
                 this.updateButtons();
             }
         }
