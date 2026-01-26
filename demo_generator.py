@@ -48,6 +48,9 @@ def create_dataclass_demo(dataclass_type, filename: str):
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             max-width: 600px;
             margin: 0 auto;
+            background: var(--pytypeinput-input-bg, #fff);
+            color: var(--pytypeinput-input-text, #000);
+            transition: background-color 0.2s, color 0.2s;
         }}
     </style>
 </head>
