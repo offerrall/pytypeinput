@@ -315,19 +315,22 @@ DATE_MACROS = '''
     <div class="pytypeinput-list-item-wrapper">
         <div class="pytypeinput-list-item">
             <div class="pytypeinput-list-item-content">
-                <input 
-                    type="date"
-                    name="{{ name }}[]"
-                    class="pytypeinput-input pytypeinput-list-input"
-                    {%- if value is not none %}
-                    value="{{ value }}"
-                    {%- elif list_item_default is defined %}
-                    value="{{ list_item_default }}"
-                    {%- endif %}
-                    {%- if list_item_default is defined %}
-                    data-default="{{ list_item_default }}"
-                    {%- endif %}
-                >
+                <div class="pytypeinput-temporal-wrapper">
+                    <input 
+                        type="text"
+                        class="pytypeinput-input pytypeinput-temporal-display"
+                        placeholder="dd/mm/yyyy"
+                        readonly
+                        {%- if value is not none %} value="{{ value }}"{%- endif %}
+                    >
+                    <input 
+                        type="date"
+                        name="{{ name }}[]"
+                        class="pytypeinput-temporal-real"
+                        {%- if value is not none %} value="{{ value }}"{%- endif %}
+                        {%- if list_item_default is defined %} data-default="{{ list_item_default }}"{%- endif %}
+                    >
+                </div>
             </div>
             <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
@@ -335,13 +338,22 @@ DATE_MACROS = '''
 {%- endmacro -%}
 
 {%- macro render_single_input() -%}
-    <input 
-        type="date"
-        id="{{ name }}"
-        name="{{ name }}"
-        class="pytypeinput-input"
-        {%- if default is not none %} value="{{ default }}"{%- endif %}
-    >
+    <div class="pytypeinput-temporal-wrapper">
+        <input 
+            type="text"
+            class="pytypeinput-input pytypeinput-temporal-display"
+            placeholder="dd/mm/yyyy"
+            readonly
+            {%- if default is not none %} value="{{ default }}"{%- endif %}
+        >
+        <input 
+            type="date"
+            id="{{ name }}"
+            name="{{ name }}"
+            class="pytypeinput-temporal-real"
+            {%- if default is not none %} value="{{ default }}"{%- endif %}
+        >
+    </div>
 {%- endmacro -%}
 '''
 
@@ -352,19 +364,22 @@ TIME_MACROS = '''
     <div class="pytypeinput-list-item-wrapper">
         <div class="pytypeinput-list-item">
             <div class="pytypeinput-list-item-content">
-                <input 
-                    type="time"
-                    name="{{ name }}[]"
-                    class="pytypeinput-input pytypeinput-list-input"
-                    {%- if value is not none %}
-                    value="{{ value }}"
-                    {%- elif list_item_default is defined %}
-                    value="{{ list_item_default }}"
-                    {%- endif %}
-                    {%- if list_item_default is defined %}
-                    data-default="{{ list_item_default }}"
-                    {%- endif %}
-                >
+                <div class="pytypeinput-temporal-wrapper">
+                    <input 
+                        type="text"
+                        class="pytypeinput-input pytypeinput-temporal-display"
+                        placeholder="hh:mm"
+                        readonly
+                        {%- if value is not none %} value="{{ value }}"{%- endif %}
+                    >
+                    <input 
+                        type="time"
+                        name="{{ name }}[]"
+                        class="pytypeinput-temporal-real"
+                        {%- if value is not none %} value="{{ value }}"{%- endif %}
+                        {%- if list_item_default is defined %} data-default="{{ list_item_default }}"{%- endif %}
+                    >
+                </div>
             </div>
             <button type="button" class="pytypeinput-list-remove">×</button>
         </div>
@@ -372,13 +387,22 @@ TIME_MACROS = '''
 {%- endmacro -%}
 
 {%- macro render_single_input() -%}
-    <input 
-        type="time"
-        id="{{ name }}"
-        name="{{ name }}"
-        class="pytypeinput-input"
-        {%- if default is not none %} value="{{ default }}"{%- endif %}
-    >
+    <div class="pytypeinput-temporal-wrapper">
+        <input 
+            type="text"
+            class="pytypeinput-input pytypeinput-temporal-display"
+            placeholder="hh:mm"
+            readonly
+            {%- if default is not none %} value="{{ default }}"{%- endif %}
+        >
+        <input 
+            type="time"
+            id="{{ name }}"
+            name="{{ name }}"
+            class="pytypeinput-temporal-real"
+            {%- if default is not none %} value="{{ default }}"{%- endif %}
+        >
+    </div>
 {%- endmacro -%}
 '''
 

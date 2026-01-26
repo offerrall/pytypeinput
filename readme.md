@@ -1,4 +1,4 @@
-# pytypeinput 0.1.2
+# pytypeinput 0.1.3
 
 <div align="center">
 

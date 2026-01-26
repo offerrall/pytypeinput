@@ -250,15 +250,15 @@ def render_time(param: ParamMetadata) -> str:
     Default value: 12:00 (noon) if not specified.
     """
     context = _build_base_context(param)
-    noon = time(12, 0).isoformat()
+    noon = "12:00"
     
     if context['default'] is not None:
-        context['default'] = context['default'].isoformat()
+        context['default'] = context['default'].strftime("%H:%M")
     else:
         context['default'] = noon
     
     if context['default_values']:
-        context['default_values'] = [t.isoformat() for t in context['default_values']]
+        context['default_values'] = [t.strftime("%H:%M") for t in context['default_values']]
     
     context['list_item_default'] = noon
     

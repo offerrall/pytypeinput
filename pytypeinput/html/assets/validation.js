@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (listItemWrapper) {
                         listItemWrapper.appendChild(errorEl);
                     } else {
-                        const wrapper = input.closest('.pytypeinput-number-wrapper');
+                        const wrapper = input.closest('.pytypeinput-number-wrapper, .pytypeinput-temporal-wrapper');
                         if (wrapper) {
                             wrapper.after(errorEl);
                         } else {
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 } else {
-                    const wrapper = input.closest('.pytypeinput-number-wrapper');
+                    const wrapper = input.closest('.pytypeinput-number-wrapper, .pytypeinput-temporal-wrapper');
                     if (wrapper) {
                         wrapper.after(errorEl);
                     } else {
@@ -361,7 +361,74 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
+    function setupTemporalInputs() {
+        const wrappers = document.querySelectorAll('.pytypeinput-temporal-wrapper');
+        
+        wrappers.forEach(wrapper => {
+            if (wrapper.dataset.temporalSetup) return;
+            wrapper.dataset.temporalSetup = 'true';
+            
+            const display = wrapper.querySelector('.pytypeinput-temporal-display');
+            const real = wrapper.querySelector('.pytypeinput-temporal-real');
+            
+            if (!display || !real) return;
+            
+            const isTimeInput = real.type === 'time';
+            
+            if (isFirefox && !isTouchDevice && isTimeInput) {
+                display.style.display = 'none';
+                real.step = '60';
+                real.classList.add('pytypeinput-input', 'pytypeinput-temporal-firefox');
+                return;
+            }
+            
+            if (real.value) {
+                display.value = real.value;
+            }
+            
+            real.addEventListener('change', function() {
+                display.value = this.value;
+            });
+            
+            real.addEventListener('input', function() {
+                display.value = this.value;
+            });
+            
+            if (isTouchDevice) {
+                return;
+            }
+            
+            display.style.pointerEvents = 'auto';
+            real.style.pointerEvents = 'none';
+            
+            display.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                real.style.pointerEvents = 'auto';
+                
+                if (real.showPicker) {
+                    try {
+                        real.showPicker();
+                    } catch (err) {
+                        real.focus();
+                        real.click();
+                    }
+                } else {
+                    real.focus();
+                    real.click();
+                }
+                
+                setTimeout(() => {
+                    real.style.pointerEvents = 'none';
+                }, 100);
+            });
+        });
+    }
+
     class ListManager {
         constructor(field) {
             this.field = field;
@@ -396,7 +463,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const firstItemWrapper = this.container.querySelector('.pytypeinput-list-item-wrapper');
             const newItemWrapper = firstItemWrapper.cloneNode(true);
             const newItem = newItemWrapper.querySelector('.pytypeinput-list-item');
-            const input = newItem.querySelector('.pytypeinput-list-input');
+            const input = newItem.querySelector('.pytypeinput-list-input') || newItem.querySelector('.pytypeinput-temporal-real');
+            
+            const temporalWrapper = newItem.querySelector('.pytypeinput-temporal-wrapper');
+            if (temporalWrapper) {
+                delete temporalWrapper.dataset.temporalSetup;
+            }
             
             if (input.type === 'checkbox') {
                 input.checked = false;
@@ -407,6 +479,13 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (input.type === 'date' || input.type === 'time') {
                 const defaultValue = input.dataset.default;
                 input.value = defaultValue || '';
+                
+                if (temporalWrapper) {
+                    const display = temporalWrapper.querySelector('.pytypeinput-temporal-display');
+                    if (display) {
+                        display.value = input.value;
+                    }
+                }
             } else if (input.type === 'range') {
                 const min = input.min || 0;
                 input.value = min;
@@ -439,6 +518,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             this.container.appendChild(newItemWrapper);
+            
+            setupTemporalInputs();
             this.updateButtons();
         }
         
@@ -496,4 +577,5 @@ document.addEventListener('DOMContentLoaded', function() {
     handleNumberControls();
     setupFileInputs();
     setupSliders();
+    setupTemporalInputs();
 });
