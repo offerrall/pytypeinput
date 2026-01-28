@@ -24,7 +24,8 @@ def _extract_constraints(param: ParamMetadata) -> dict:
     """Extract all constraints from parameter metadata into a flat dictionary.
     
     Converts Pydantic constraints (ge, gt, le, lt, min_length, max_length, pattern)
-    into a format usable by Jinja2 templates.
+    into a format usable by Jinja2 templates. For gt/lt constraints, uses a minimal
+    epsilon value to represent exclusive boundaries in HTML inputs.
     
     Args:
         param: Parameter metadata containing constraints.
@@ -40,18 +41,25 @@ def _extract_constraints(param: ParamMetadata) -> dict:
         'pattern': None
     }
     
-    # Mappings for value-level constraints (min, max, pattern, etc.)
+    def get_epsilon(param_type):
+        """Get smallest representable value for exclusive boundaries."""
+        if param_type == int:
+            return 1
+        else:
+            return 0.000001
+    
+    epsilon = get_epsilon(param.param_type)
+    
     value_mappings = [
-        ('ge', 'min', lambda x: x),          # Greater or equal
-        ('gt', 'min', lambda x: x + 1),      # Greater than (add 1)
-        ('le', 'max', lambda x: x),          # Less or equal
-        ('lt', 'max', lambda x: x - 1),      # Less than (subtract 1)
-        ('min_length', 'min', lambda x: x),  # String min length
-        ('max_length', 'max', lambda x: x),  # String max length
-        ('pattern', 'pattern', lambda x: x), # Regex pattern
+        ('ge', 'min', lambda x: x),
+        ('gt', 'min', lambda x: x + epsilon),
+        ('le', 'max', lambda x: x),
+        ('lt', 'max', lambda x: x - epsilon),
+        ('min_length', 'min', lambda x: x),
+        ('max_length', 'max', lambda x: x),
+        ('pattern', 'pattern', lambda x: x),
     ]
     
-    # Mappings for list-level constraints
     list_mappings = [
         ('min_length', 'min_items', lambda x: x),
         ('max_length', 'max_items', lambda x: x),

@@ -316,11 +316,76 @@ document.addEventListener('DOMContentLoaded', function() {
         updateFileList(input);
     }
     
+    function setupFileInputDragDrop(input) {
+        let dragCounter = 0;
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            input.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        input.addEventListener('dragenter', () => {
+            dragCounter++;
+            if (dragCounter === 1) {
+                input.classList.add('pytypeinput-dragging');
+            }
+        });
+        
+        input.addEventListener('dragleave', () => {
+            dragCounter--;
+            if (dragCounter === 0) {
+                input.classList.remove('pytypeinput-dragging');
+            }
+        });
+        
+        input.addEventListener('drop', (e) => {
+            dragCounter = 0;
+            input.classList.remove('pytypeinput-dragging');
+            
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            let filteredFiles = Array.from(files);
+            
+            if (input.accept) {
+                const acceptedTypes = input.accept.split(',').map(type => type.trim());
+                filteredFiles = filteredFiles.filter(file => {
+                    return acceptedTypes.some(acceptedType => {
+                        if (acceptedType.startsWith('.')) {
+                            return file.name.toLowerCase().endsWith(acceptedType.toLowerCase());
+                        }
+                        if (acceptedType.includes('/*')) {
+                            const baseType = acceptedType.split('/')[0];
+                            return file.type.startsWith(baseType + '/');
+                        }
+                        return file.type === acceptedType;
+                    });
+                });
+            }
+            
+            if (!input.multiple && filteredFiles.length > 0) {
+                filteredFiles = [filteredFiles[0]];
+            }
+            
+            const newDt = new DataTransfer();
+            filteredFiles.forEach(file => newDt.items.add(file));
+            
+            input.files = newDt.files;
+            updateFileList(input);
+        });
+    }
+    
     function setupFileInputs() {
         document.querySelectorAll('[data-file-input]').forEach(input => {
             input.addEventListener('change', () => {
                 updateFileList(input);
             });
+            
+            setupFileInputDragDrop(input);
         });
         
         document.querySelectorAll('[data-add-more-files]').forEach(btn => {
@@ -346,6 +411,62 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 tempInput.click();
+            });
+            
+            let dragCounter = 0;
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                btn.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+            
+            btn.addEventListener('dragenter', () => {
+                dragCounter++;
+                if (dragCounter === 1) {
+                    btn.classList.add('pytypeinput-dragging');
+                }
+            });
+            
+            btn.addEventListener('dragleave', () => {
+                dragCounter--;
+                if (dragCounter === 0) {
+                    btn.classList.remove('pytypeinput-dragging');
+                }
+            });
+            
+            btn.addEventListener('drop', (e) => {
+                dragCounter = 0;
+                btn.classList.remove('pytypeinput-dragging');
+                
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                let filteredFiles = Array.from(files);
+                
+                if (input.accept) {
+                    const acceptedTypes = input.accept.split(',').map(type => type.trim());
+                    filteredFiles = filteredFiles.filter(file => {
+                        return acceptedTypes.some(acceptedType => {
+                            if (acceptedType.startsWith('.')) {
+                                return file.name.toLowerCase().endsWith(acceptedType.toLowerCase());
+                            }
+                            if (acceptedType.includes('/*')) {
+                                const baseType = acceptedType.split('/')[0];
+                                return file.type.startsWith(baseType + '/');
+                            }
+                            return file.type === acceptedType;
+                        });
+                    });
+                }
+                
+                const newDt = new DataTransfer();
+                Array.from(input.files).forEach(file => newDt.items.add(file));
+                filteredFiles.forEach(file => newDt.items.add(file));
+                
+                input.files = newDt.files;
+                updateFileList(input);
             });
         });
     }
