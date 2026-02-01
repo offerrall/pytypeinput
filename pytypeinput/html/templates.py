@@ -95,6 +95,7 @@ INT_MACROS = '''
                         name="{{ name }}[]"
                         class="pytypeinput-input pytypeinput-list-input"
                         autocomplete="off"
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- endif %}
                         {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
                         {%- if min is not none %} data-min="{{ min }}"{%- endif %}
@@ -102,12 +103,12 @@ INT_MACROS = '''
                         step="{{ step }}"
                     >
                     <div class="pytypeinput-number-controls">
-                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-up">▲</button>
-                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-down">▼</button>
+                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-up"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>▲</button>
+                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-down"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>▼</button>
                     </div>
                 </div>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -148,6 +149,7 @@ STR_MACROS = '''
                     name="{{ name }}[]"
                     class="pytypeinput-input pytypeinput-list-input"
                     autocomplete="off"
+                    {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                     {%- if value is not none %} value="{{ value }}"{%- endif %}
                     {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
                     {%- if min is not none %} minlength="{{ min }}" data-minlength="{{ min }}"{%- endif %}
@@ -156,7 +158,7 @@ STR_MACROS = '''
                     {%- if pattern_message is not none %} data-pattern-message="{{ pattern_message }}"{%- endif %}
                 >
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -190,6 +192,7 @@ STR_TEXTAREA_MACROS = '''
                     name="{{ name }}[]"
                     class="pytypeinput-input pytypeinput-list-input"
                     autocomplete="off"
+                    {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                     {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
                     {%- if min is not none %} minlength="{{ min }}" data-minlength="{{ min }}"{%- endif %}
                     {%- if max is not none %} maxlength="{{ max }}" data-maxlength="{{ max }}"{%- endif %}
@@ -198,7 +201,7 @@ STR_TEXTAREA_MACROS = '''
                     rows="{{ rows }}"
                 >{{ value if value is not none else '' }}</textarea>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -235,6 +238,7 @@ FLOAT_MACROS = '''
                         class="pytypeinput-input pytypeinput-list-input"
                         autocomplete="off"
                         data-float="true"
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- endif %}
                         {%- if placeholder is not none %} placeholder="{{ placeholder }}"{%- endif %}
                         {%- if min is not none %} data-min="{{ min }}"{%- endif %}
@@ -242,12 +246,12 @@ FLOAT_MACROS = '''
                         step="{{ step }}"
                     >
                     <div class="pytypeinput-number-controls">
-                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-up">▲</button>
-                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-down">▼</button>
+                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-up"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>▲</button>
+                        <button type="button" class="pytypeinput-number-btn pytypeinput-number-down"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>▼</button>
                     </div>
                 </div>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -288,12 +292,13 @@ BOOL_MACROS = '''
                         type="checkbox"
                         name="{{ name }}[]"
                         class="pytypeinput-checkbox pytypeinput-list-input"
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value %} checked{%- endif %}
                     >
                     <span class="pytypeinput-toggle-slider"></span>
                 </label>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -326,18 +331,20 @@ DATE_MACROS = '''
                         class="pytypeinput-input pytypeinput-temporal-display"
                         placeholder="dd/mm/yyyy"
                         readonly
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- endif %}
                     >
                     <input 
                         type="date"
                         name="{{ name }}[]"
                         class="pytypeinput-temporal-real"
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- endif %}
                         {%- if list_item_default is defined %} data-default="{{ list_item_default }}"{%- endif %}
                     >
                 </div>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -377,18 +384,20 @@ TIME_MACROS = '''
                         class="pytypeinput-input pytypeinput-temporal-display"
                         placeholder="hh:mm"
                         readonly
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- endif %}
                     >
                     <input 
                         type="time"
                         name="{{ name }}[]"
                         class="pytypeinput-temporal-real"
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- endif %}
                         {%- if list_item_default is defined %} data-default="{{ list_item_default }}"{%- endif %}
                     >
                 </div>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -425,13 +434,14 @@ SELECT_MACROS = '''
                 <select 
                     name="{{ name }}[]"
                     class="pytypeinput-select pytypeinput-list-input"
+                    {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                 >
                     {%- for option in options %}
                     <option value="{{ option }}"{% if value == option %} selected{% endif %}>{{ option }}</option>
                     {%- endfor %}
                 </select>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -527,6 +537,7 @@ SLIDER_INT_MACROS = '''
                         type="range"
                         name="{{ name }}[]"
                         class="pytypeinput-slider pytypeinput-list-input"
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- else %} value="{{ min if min is not none else 0 }}"{%- endif %}
                         {%- if min is not none %} min="{{ min }}"{%- endif %}
                         {%- if max is not none %} max="{{ max }}"{%- endif %}
@@ -537,7 +548,7 @@ SLIDER_INT_MACROS = '''
                     {%- endif -%}
                 </div>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
@@ -576,6 +587,7 @@ SLIDER_FLOAT_MACROS = '''
                         name="{{ name }}[]"
                         class="pytypeinput-slider pytypeinput-list-input"
                         data-float="true"
+                        {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- else %} value="{{ min if min is not none else 0 }}"{%- endif %}
                         {%- if min is not none %} min="{{ min }}"{%- endif %}
                         {%- if max is not none %} max="{{ max }}"{%- endif %}
@@ -586,7 +598,7 @@ SLIDER_FLOAT_MACROS = '''
                     {%- endif -%}
                 </div>
             </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+            <button type="button" class="pytypeinput-list-remove"{%- if is_optional and not optional_enabled %} disabled{%- endif %}>×</button>
         </div>
     </div>
 {%- endmacro -%}
