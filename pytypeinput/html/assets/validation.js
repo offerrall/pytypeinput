@@ -197,8 +197,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!targetContent) return;
         
+        const inputs = targetContent.querySelectorAll('input, select, textarea, button');
+        
         if (toggle.checked) {
             targetContent.classList.remove('hidden');
+            
+            inputs.forEach(input => {
+                input.disabled = false;
+            });
             
             const field = targetContent.closest('.pytypeinput-field');
             const input = targetContent.querySelector('.pytypeinput-input:not(.pytypeinput-list-input), .pytypeinput-checkbox, .pytypeinput-select');
@@ -210,6 +216,10 @@ document.addEventListener('DOMContentLoaded', function() {
             targetContent.querySelectorAll('.pytypeinput-list-input').forEach(validateListItem);
         } else {
             targetContent.classList.add('hidden');
+            
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
             
             const field = targetContent.closest('.pytypeinput-field');
             DOM.removeError(field);
