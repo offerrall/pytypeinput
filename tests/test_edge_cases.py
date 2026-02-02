@@ -7,7 +7,7 @@ from datetime import date, time
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pytypeinput.analyzer import analyze_function
+from pytypeinput.analyzers import analyze_function
 from pytypeinput.types import (
     Color, Email, ImageFile, VideoFile, AudioFile,
     DataFile, TextFile, DocumentFile, File,

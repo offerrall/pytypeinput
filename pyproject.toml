@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytypeinput"
-version = "0.1.5"
+version = "0.1.6"
 description = "Type hints → UI metadata. Build forms from Python function signatures."
 readme = "README.md"
 license = {text = "MIT"}

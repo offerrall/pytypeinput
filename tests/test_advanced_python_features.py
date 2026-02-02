@@ -10,7 +10,7 @@ from pathlib import Path as PathType
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pytypeinput.analyzer import analyze_function
+from pytypeinput.analyzers import analyze_function
 from pytypeinput.types import Color, Email, OptionalEnabled, OptionalDisabled, Dropdown
 from pydantic import Field
 

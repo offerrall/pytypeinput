@@ -226,19 +226,29 @@ class TestEmailInheritance:
         assert has_pattern
         assert has_max
     
-    def test_work_email_double_inheritance(self):
-        """WorkEmail inherits from ValidEmail (which inherits from Email) and adds domain pattern."""
+    def test_work_email_replaces_pattern_loses_widget(self):
+        """WorkEmail replaces Email pattern, loses Email widget type.
+        
+        When you override the pattern, the widget type detection uses the new pattern.
+        Since '.*@company\.com$' is not a recognized special type, widget_type becomes None.
+        
+        To preserve Email widget while adding domain validation, combine patterns manually.
+        """
         def func(email: WorkEmail): pass
         params = analyze_function(func)
         
-        assert params[0].widget_type == "Email"
-        assert params[0].constraints is not None
+        # widget_type is None (pattern override not recognized)
+        assert params[0].widget_type is None
         
-        has_max = any(hasattr(c, 'max_length') and c.max_length == 254 for c in params[0].constraints.metadata)
-        pattern_count = sum(1 for c in params[0].constraints.metadata if hasattr(c, 'pattern'))
+        # But still has all constraints
+        max_lens = [c.max_length for c in params[0].constraints.metadata if hasattr(c, 'max_length')]
+        patterns = [c.pattern for c in params[0].constraints.metadata if hasattr(c, 'pattern')]
         
-        assert has_max
-        assert pattern_count >= 2, "Should have both Email pattern and company domain pattern"
+        assert len(max_lens) == 1
+        assert max_lens[0] == 254
+        
+        assert len(patterns) == 1
+        assert patterns[0] == r'.*@company\.com$'
 
 
 class TestColorInheritance:
@@ -297,7 +307,7 @@ class TestComplexComposition:
         assert params[0].ui.label == "Value"
     
     def test_quadruple_composition_string(self):
-        """Four levels of composition all merge correctly."""
+        """Four levels of composition - last pattern wins."""
         Level1: TypeAlias = Annotated[str, Field(min_length=1)]
         Level2: TypeAlias = Annotated[Level1, Field(max_length=100)]
         Level3: TypeAlias = Annotated[Level2, Field(pattern=r'^[A-Z]')]
@@ -309,11 +319,14 @@ class TestComplexComposition:
         assert params[0].constraints is not None
         has_min = any(hasattr(c, 'min_length') for c in params[0].constraints.metadata)
         has_max = any(hasattr(c, 'max_length') for c in params[0].constraints.metadata)
-        has_pattern = any(hasattr(c, 'pattern') for c in params[0].constraints.metadata)
+        
+        # Only last pattern
+        patterns = [c.pattern for c in params[0].constraints.metadata if hasattr(c, 'pattern')]
         
         assert has_min
         assert has_max
-        assert has_pattern
+        assert len(patterns) == 1
+        assert patterns[0] == r'^[A-Z]'
         assert params[0].ui.label == "Name"
         assert params[0].ui.description is not None
     
@@ -337,6 +350,49 @@ class TestComplexComposition:
         assert has_max
         assert params[0].ui.label == "Email"
         assert params[0].ui.placeholder == "you@example.com"
+
+
+class TestConstraintOverride:
+    """Test constraint override behavior (last wins)."""
+    
+    def test_max_length_override(self):
+        """Later max_length overrides earlier one."""
+        Base: TypeAlias = Annotated[str, Field(max_length=100)]
+        Strict: TypeAlias = Annotated[Base, Field(max_length=50)]
+        
+        def func(text: Strict): pass
+        params = analyze_function(func)
+        
+        max_lens = [c.max_length for c in params[0].constraints.metadata if hasattr(c, 'max_length')]
+        
+        assert len(max_lens) == 1
+        assert max_lens[0] == 50, "Should use last max_length"
+    
+    def test_ge_override(self):
+        """Later ge overrides earlier one."""
+        Base: TypeAlias = Annotated[int, Field(ge=0)]
+        Strict: TypeAlias = Annotated[Base, Field(ge=10)]
+        
+        def func(value: Strict): pass
+        params = analyze_function(func)
+        
+        ge_vals = [c.ge for c in params[0].constraints.metadata if hasattr(c, 'ge')]
+        
+        assert len(ge_vals) == 1
+        assert ge_vals[0] == 10, "Should use last ge"
+    
+    def test_pattern_override(self):
+        """Later pattern overrides earlier one."""
+        Base: TypeAlias = Annotated[str, Field(pattern=r'^[a-z]+$')]
+        Override: TypeAlias = Annotated[Base, Field(pattern=r'^[a-z]{3,}$')]
+        
+        def func(value: Override): pass
+        params = analyze_function(func)
+        
+        patterns = [c.pattern for c in params[0].constraints.metadata if hasattr(c, 'pattern')]
+        
+        assert len(patterns) == 1
+        assert patterns[0] == r'^[a-z]{3,}$', "Should use last pattern"
 
 
 class TestRealWorldDomainTypes:

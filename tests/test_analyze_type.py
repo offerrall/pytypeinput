@@ -1,4 +1,3 @@
-# tests/test_analyze_type.py
 import pytest
 from typing import Annotated
 from datetime import date, time

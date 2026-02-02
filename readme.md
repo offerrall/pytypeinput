@@ -1,10 +1,10 @@
-# pytypeinput 0.1.5
+# pytypeinput 0.1.6
 
 <div align="center">
 
 [![PyPI version](https://img.shields.io/pypi/v/pytypeinput.svg)](https://pypi.org/project/pytypeinput/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-727%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-742%20passed-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Extract structured metadata from Python type hints.**

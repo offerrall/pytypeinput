@@ -6,7 +6,7 @@ from enum import Enum
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pytypeinput.analyzer import analyze_function
+from pytypeinput.analyzers import analyze_function
 from pytypeinput.types import Dropdown
 from pydantic import Field
 

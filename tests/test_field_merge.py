@@ -329,24 +329,6 @@ class TestConstraintMergeEdgeCases:
         
         assert params[0].constraints is not None
     
-    def test_multiple_patterns_all_preserved(self):
-        """Multiple pattern constraints are all preserved (edge case)."""
-        def func(
-            value: Annotated[
-                Annotated[str, Field(pattern=r'^[a-z]+$')],
-                Field(pattern=r'^[a-z]{3,}$')
-            ]
-        ): pass
-        params = analyze_function(func)
-        
-        assert params[0].constraints is not None
-        
-        pattern_count = sum(
-            1 for c in params[0].constraints.metadata
-            if hasattr(c, 'pattern')
-        )
-        assert pattern_count == 2
-    
     def test_conflicting_constraints_both_preserved(self):
         """Conflicting constraints both preserved (validation will fail later)."""
         def func(

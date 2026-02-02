@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pytypeinput.analyzer import analyze_function
+from pytypeinput.analyzers import analyze_function
 
 
 def get_param(result, name):

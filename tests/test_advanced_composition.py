@@ -2,487 +2,512 @@ import pytest
 from typing import Annotated, TypeAlias
 from pydantic import Field
 from pytypeinput import (
-    analyze_function,
     analyze_type,
-    analyze_dataclass,
+    analyze_function,
     Email,
-    Color,
-    ImageFile,
-    Slider,
     Label,
     Description,
     Placeholder,
-    PatternMessage,
+    Slider,
     Step,
-    Rows,
-    IsPassword
+    PatternMessage
 )
-from dataclasses import dataclass
 
 
-# ==================== DOMAIN TYPE LIBRARY ====================
-
-# Numeric base types
-PositiveInt: TypeAlias = Annotated[int, Field(ge=0)]
-NegativeInt: TypeAlias = Annotated[int, Field(lt=0)]
-PositiveFloat: TypeAlias = Annotated[float, Field(ge=0.0)]
-
-# Percentage (0-100)
-Percentage: TypeAlias = Annotated[PositiveInt, Field(le=100)]
-
-# Score (0-10)
-Score: TypeAlias = Annotated[PositiveInt, Field(le=10)]
-
-# Age
-Age: TypeAlias = Annotated[PositiveInt, Field(le=120)]
-
-# Temperature (above absolute zero)
-Temperature: TypeAlias = Annotated[float, Field(gt=-273.15)]
-
-# String base types
-NonEmptyString: TypeAlias = Annotated[str, Field(min_length=1)]
-ShortString: TypeAlias = Annotated[str, Field(max_length=50)]
-MediumString: TypeAlias = Annotated[str, Field(max_length=200)]
-LongString: TypeAlias = Annotated[str, Field(max_length=1000)]
-
-# Combined string types
-ShortRequired: TypeAlias = Annotated[NonEmptyString, Field(max_length=50)]
-MediumRequired: TypeAlias = Annotated[NonEmptyString, Field(max_length=200)]
-
-# Username with validation
-Username: TypeAlias = Annotated[
-    str,
-    Field(min_length=3, max_length=20, pattern=r'^[a-zA-Z0-9_]+$')
-]
-
-# Slug (URL-safe)
-Slug: TypeAlias = Annotated[
-    str,
-    Field(min_length=3, max_length=50, pattern=r'^[a-z0-9-]+$')
-]
-
-# Email variants
-ValidatedEmail: TypeAlias = Annotated[Email, Field(min_length=5, max_length=254)]
-ShortEmail: TypeAlias = Annotated[Email, Field(max_length=100)]
-
-# UI-enhanced types
-VolumeSlider: TypeAlias = Annotated[
-    Percentage,
-    Slider(),
-    Label("Volume"),
-    Description("Audio volume (0-100%)")
-]
-
-BrightnessSlider: TypeAlias = Annotated[
-    Percentage,
-    Slider(show_value=True),
-    Label("Brightness"),
-    Description("Screen brightness level")
-]
-
-OpacitySlider: TypeAlias = Annotated[
-    Annotated[float, Field(ge=0.0, le=1.0)],
-    Slider(),
-    Label("Opacity"),
-    Step(0.1)
-]
-
-LabeledUsername: TypeAlias = Annotated[
-    Username,
-    Label("Username"),
-    Description("Choose a unique username (3-20 characters)"),
-    Placeholder("Enter username"),
-    PatternMessage("Only letters, numbers, and underscores allowed")
-]
-
-LabeledEmail: TypeAlias = Annotated[
-    ValidatedEmail,
-    Label("Email Address"),
-    Placeholder("you@example.com"),
-    Description("We'll never share your email")
-]
-
-LabeledAge: TypeAlias = Annotated[
-    Age,
-    Label("Age"),
-    Description("You must be 18 or older to register")
-]
-
-SecurePassword: TypeAlias = Annotated[
-    str,
-    Field(min_length=8, max_length=128),
-    IsPassword,
-    Label("Password"),
-    Description("Minimum 8 characters"),
-    Placeholder("Enter secure password")
-]
-
-LongBio: TypeAlias = Annotated[
-    LongString,
-    Rows(5),
-    Label("Biography"),
-    Description("Tell us about yourself"),
-    Placeholder("Write a short bio...")
-]
-
-ThemeColor: TypeAlias = Annotated[
-    Color,
-    Field(min_length=7, max_length=7),
-    Label("Theme Color"),
-    Description("Choose your primary theme color")
-]
-
-
-# ==================== ADVANCED COMPOSITION TESTS ====================
-
-class TestAdvancedTypeComposition:
-    """Test advanced type composition scenarios."""
+class TestConstraintMerging:
+    """Test constraint merging rules: different types merge, same type last wins."""
     
-    def test_triple_nested_numeric_composition(self):
-        """Three levels: base → percentage → slider with UI."""
-        param = analyze_type(VolumeSlider, name="volume")
+    def test_different_constraints_merge(self):
+        """Different constraint types are accumulated."""
+        Base: TypeAlias = Annotated[str, Field(max_length=100)]
+        Enhanced: TypeAlias = Annotated[Base, Field(min_length=5)]
         
-        # Check all constraints merged
-        has_ge = any(hasattr(c, 'ge') and c.ge == 0 for c in param.constraints.metadata)
-        has_le = any(hasattr(c, 'le') and c.le == 100 for c in param.constraints.metadata)
+        param = analyze_type(Enhanced, name="text")
         
-        assert has_ge, "Should inherit ge=0 from PositiveInt"
-        assert has_le, "Should inherit le=100 from Percentage"
+        min_lens = [c.min_length for c in param.constraints.metadata if hasattr(c, 'min_length')]
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
         
-        # Check UI metadata
+        assert len(min_lens) == 1
+        assert min_lens[0] == 5
+        assert len(max_lens) == 1
+        assert max_lens[0] == 100
+    
+    def test_same_constraint_last_wins_max_length(self):
+        """Same constraint type - last one wins (max_length)."""
+        Loose: TypeAlias = Annotated[str, Field(max_length=100)]
+        Strict: TypeAlias = Annotated[Loose, Field(max_length=50)]
+        
+        param = analyze_type(Strict, name="text")
+        
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        
+        assert len(max_lens) == 1
+        assert max_lens[0] == 50, "Last max_length should win"
+    
+    def test_same_constraint_last_wins_min_length(self):
+        """Same constraint type - last one wins (min_length)."""
+        Base: TypeAlias = Annotated[str, Field(min_length=1)]
+        Strict: TypeAlias = Annotated[Base, Field(min_length=10)]
+        
+        param = analyze_type(Strict, name="text")
+        
+        min_lens = [c.min_length for c in param.constraints.metadata if hasattr(c, 'min_length')]
+        
+        assert len(min_lens) == 1
+        assert min_lens[0] == 10, "Last min_length should win"
+    
+    def test_same_constraint_last_wins_ge(self):
+        """Same constraint type - last one wins (ge)."""
+        Base: TypeAlias = Annotated[int, Field(ge=0)]
+        Strict: TypeAlias = Annotated[Base, Field(ge=10)]
+        
+        param = analyze_type(Strict, name="value")
+        
+        ge_vals = [c.ge for c in param.constraints.metadata if hasattr(c, 'ge')]
+        
+        assert len(ge_vals) == 1
+        assert ge_vals[0] == 10, "Last ge should win"
+    
+    def test_same_constraint_last_wins_le(self):
+        """Same constraint type - last one wins (le)."""
+        Base: TypeAlias = Annotated[int, Field(le=100)]
+        Strict: TypeAlias = Annotated[Base, Field(le=50)]
+        
+        param = analyze_type(Strict, name="value")
+        
+        le_vals = [c.le for c in param.constraints.metadata if hasattr(c, 'le')]
+        
+        assert len(le_vals) == 1
+        assert le_vals[0] == 50, "Last le should win"
+    
+    def test_same_constraint_last_wins_pattern(self):
+        """Same constraint type - last one wins (pattern)."""
+        Base: TypeAlias = Annotated[str, Field(pattern=r'^[a-z]+$')]
+        Enhanced: TypeAlias = Annotated[Base, Field(pattern=r'^[a-z]{3,}$')]
+        
+        param = analyze_type(Enhanced, name="text")
+        
+        patterns = [c.pattern for c in param.constraints.metadata if hasattr(c, 'pattern')]
+        
+        assert len(patterns) == 1
+        assert patterns[0] == r'^[a-z]{3,}$', "Last pattern should win"
+    
+    def test_both_ge_and_le_override(self):
+        """Can override both ge and le simultaneously."""
+        Base: TypeAlias = Annotated[int, Field(ge=0, le=100)]
+        Stricter: TypeAlias = Annotated[Base, Field(ge=10, le=90)]
+        
+        param = analyze_type(Stricter, name="value")
+        
+        ge_vals = [c.ge for c in param.constraints.metadata if hasattr(c, 'ge')]
+        le_vals = [c.le for c in param.constraints.metadata if hasattr(c, 'le')]
+        
+        assert len(ge_vals) == 1
+        assert ge_vals[0] == 10
+        assert len(le_vals) == 1
+        assert le_vals[0] == 90
+
+
+class TestStringComposition:
+    """Test string type composition scenarios."""
+    
+    def test_required_string_composition(self):
+        """RequiredString has min_length=1."""
+        RequiredString: TypeAlias = Annotated[str, Field(min_length=1)]
+        
+        param = analyze_type(RequiredString, name="text")
+        
+        min_lens = [c.min_length for c in param.constraints.metadata if hasattr(c, 'min_length')]
+        
+        assert len(min_lens) == 1
+        assert min_lens[0] == 1
+    
+    def test_short_required_string_composition(self):
+        """ShortRequiredString combines min and max."""
+        RequiredString: TypeAlias = Annotated[str, Field(min_length=1)]
+        ShortRequiredString: TypeAlias = Annotated[RequiredString, Field(max_length=50)]
+        
+        param = analyze_type(ShortRequiredString, name="text")
+        
+        min_lens = [c.min_length for c in param.constraints.metadata if hasattr(c, 'min_length')]
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        
+        assert len(min_lens) == 1
+        assert min_lens[0] == 1
+        assert len(max_lens) == 1
+        assert max_lens[0] == 50
+    
+    def test_very_short_string_override(self):
+        """VeryShortString overrides max_length."""
+        ShortString: TypeAlias = Annotated[str, Field(max_length=50)]
+        VeryShortString: TypeAlias = Annotated[ShortString, Field(max_length=20)]
+        
+        param = analyze_type(VeryShortString, name="text")
+        
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        
+        assert len(max_lens) == 1
+        assert max_lens[0] == 20
+    
+    def test_username_pattern_with_lengths(self):
+        """Username has min, max, and pattern."""
+        Username: TypeAlias = Annotated[
+            str,
+            Field(min_length=3, max_length=20, pattern=r'^[a-zA-Z0-9_]+$')
+        ]
+        
+        param = analyze_type(Username, name="username")
+        
+        min_lens = [c.min_length for c in param.constraints.metadata if hasattr(c, 'min_length')]
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        patterns = [c.pattern for c in param.constraints.metadata if hasattr(c, 'pattern')]
+        
+        assert len(min_lens) == 1
+        assert min_lens[0] == 3
+        assert len(max_lens) == 1
+        assert max_lens[0] == 20
+        assert len(patterns) == 1
+        assert patterns[0] == r'^[a-zA-Z0-9_]+$'
+
+
+class TestUIMetadataComposition:
+    """Test UI metadata composition - always accumulated, never replaced."""
+    
+    def test_label_preserved(self):
+        """Label is preserved through composition."""
+        Base: TypeAlias = Annotated[str, Label("Base Label")]
+        
+        param = analyze_type(Base, name="field")
+        
+        assert param.ui is not None
+        assert param.ui.label == "Base Label"
+    
+    def test_multiple_ui_metadata_accumulated(self):
+        """Multiple UI metadata types are accumulated."""
+        Base: TypeAlias = Annotated[int, Label("Value")]
+        Enhanced: TypeAlias = Annotated[Base, Description("Enter a value")]
+        
+        param = analyze_type(Enhanced, name="field")
+        
+        assert param.ui is not None
+        assert param.ui.label == "Value"
+        assert param.ui.description == "Enter a value"
+    
+    def test_slider_with_label_and_description(self):
+        """Slider + Label + Description all work together."""
+        PositiveInt: TypeAlias = Annotated[int, Field(ge=0)]
+        Percentage: TypeAlias = Annotated[PositiveInt, Field(le=100)]
+        PercentageSlider: TypeAlias = Annotated[
+            Percentage,
+            Slider(),
+            Label("Volume"),
+            Description("Adjust volume level")
+        ]
+        
+        param = analyze_type(PercentageSlider, name="volume")
+        
         assert param.ui is not None
         assert param.ui.is_slider is True
         assert param.ui.label == "Volume"
-        assert param.ui.description == "Audio volume (0-100%)"
+        assert param.ui.description == "Adjust volume level"
+        
+        # Check constraints preserved
+        ge_vals = [c.ge for c in param.constraints.metadata if hasattr(c, 'ge')]
+        le_vals = [c.le for c in param.constraints.metadata if hasattr(c, 'le')]
+        assert ge_vals == [0]
+        assert le_vals == [100]
     
-    def test_opacity_slider_with_step(self):
-        """Float slider with custom step."""
-        param = analyze_type(OpacitySlider, name="opacity")
+    def test_all_ui_metadata_types(self):
+        """All UI metadata types can be composed together."""
+        Complex: TypeAlias = Annotated[
+            str,
+            Field(min_length=3, max_length=50, pattern=r'^[a-zA-Z]+$'),
+            Label("Full Name"),
+            Description("Enter your full name"),
+            Placeholder("John Doe"),
+            PatternMessage("Only letters allowed"),
+            Step(1)
+        ]
         
-        has_ge = any(hasattr(c, 'ge') and c.ge == 0.0 for c in param.constraints.metadata)
-        has_le = any(hasattr(c, 'le') and c.le == 1.0 for c in param.constraints.metadata)
+        param = analyze_type(Complex, name="name")
         
-        assert has_ge
-        assert has_le
-        assert param.ui.is_slider is True
-        assert param.ui.step == 0.1
-        assert param.ui.label == "Opacity"
+        assert param.ui is not None
+        assert param.ui.label == "Full Name"
+        assert param.ui.description == "Enter your full name"
+        assert param.ui.placeholder == "John Doe"
+        assert param.ui.pattern_message == "Only letters allowed"
+        assert param.ui.step == 1
+
+
+class TestSpecialTypeInheritance:
+    """Test Email and other special types with constraint inheritance."""
     
-    def test_quadruple_nested_string_composition(self):
-        """Four levels: str → NonEmpty → Short → Username → UI."""
-        param = analyze_type(LabeledUsername, name="user")
+    def test_email_with_max_length(self):
+        """Email with max_length preserves Email pattern and widget type."""
+        ValidEmail: TypeAlias = Annotated[Email, Field(max_length=254)]
         
-        # Check constraints
-        has_min = any(hasattr(c, 'min_length') and c.min_length == 3 for c in param.constraints.metadata)
-        has_max = any(hasattr(c, 'max_length') and c.max_length == 20 for c in param.constraints.metadata)
-        has_pattern = any(hasattr(c, 'pattern') for c in param.constraints.metadata)
+        param = analyze_type(ValidEmail, name="email")
         
-        assert has_min
-        assert has_max
-        assert has_pattern
-        
-        # Check all UI metadata
-        assert param.ui.label == "Username"
-        assert param.ui.description is not None
-        assert param.ui.placeholder == "Enter username"
-        assert param.ui.pattern_message is not None
-    
-    def test_email_double_inheritance_with_ui(self):
-        """Email → ValidatedEmail → LabeledEmail."""
-        param = analyze_type(LabeledEmail, name="contact")
-        
-        # Should have Email widget
         assert param.widget_type == "Email"
         
-        # Should have length constraints
-        has_min = any(hasattr(c, 'min_length') and c.min_length == 5 for c in param.constraints.metadata)
-        has_max = any(hasattr(c, 'max_length') and c.max_length == 254 for c in param.constraints.metadata)
-        has_pattern = any(hasattr(c, 'pattern') for c in param.constraints.metadata)
+        patterns = [c.pattern for c in param.constraints.metadata if hasattr(c, 'pattern')]
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
         
-        assert has_min, "Should have min_length=5"
-        assert has_max, "Should have max_length=254"
-        assert has_pattern, "Should preserve Email pattern"
-        
-        # Check UI
-        assert param.ui.label == "Email Address"
-        assert param.ui.placeholder == "you@example.com"
-        assert param.ui.description is not None
+        assert len(patterns) == 1  # Email pattern
+        assert len(max_lens) == 1
+        assert max_lens[0] == 254
     
-    def test_password_with_multiple_constraints_and_ui(self):
-        """Password with length + IsPassword + UI metadata."""
-        param = analyze_type(SecurePassword, name="pwd")
+    def test_email_with_min_and_max_length(self):
+        """Email with both min and max length."""
+        StrictEmail: TypeAlias = Annotated[Email, Field(min_length=5, max_length=100)]
         
-        has_min = any(hasattr(c, 'min_length') and c.min_length == 8 for c in param.constraints.metadata)
-        has_max = any(hasattr(c, 'max_length') and c.max_length == 128 for c in param.constraints.metadata)
+        param = analyze_type(StrictEmail, name="email")
         
-        assert has_min
-        assert has_max
-        assert param.ui.is_password is True
-        assert param.ui.label == "Password"
-        assert param.ui.description == "Minimum 8 characters"
-        assert param.ui.placeholder is not None
+        assert param.widget_type == "Email"
+        
+        min_lens = [c.min_length for c in param.constraints.metadata if hasattr(c, 'min_length')]
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        
+        assert len(min_lens) == 1
+        assert min_lens[0] == 5
+        assert len(max_lens) == 1
+        assert max_lens[0] == 100
     
-    def test_long_bio_with_rows_and_ui(self):
-        """LongString → Rows + Label + Description."""
-        param = analyze_type(LongBio, name="bio")
+    def test_pattern_override_loses_widget_type(self):
+        """Overriding pattern loses Email widget type."""
+        ValidEmail: TypeAlias = Annotated[Email, Field(max_length=254)]
+        WorkEmail: TypeAlias = Annotated[ValidEmail, Field(pattern=r'.*@company\.com$')]
         
-        has_max = any(hasattr(c, 'max_length') and c.max_length == 1000 for c in param.constraints.metadata)
+        param = analyze_type(WorkEmail, name="work_email")
         
-        assert has_max
-        assert param.ui.rows == 5
-        assert param.ui.label == "Biography"
-        assert param.ui.description is not None
-        assert param.ui.placeholder is not None
-    
-    def test_theme_color_with_exact_length(self):
-        """Color with exact hex format (#RRGGBB)."""
-        param = analyze_type(ThemeColor, name="theme")
+        # Widget type is lost because pattern was overridden
+        assert param.widget_type is None
         
-        assert param.widget_type == "Color"
+        # But constraints are preserved correctly
+        patterns = [c.pattern for c in param.constraints.metadata if hasattr(c, 'pattern')]
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
         
-        has_min = any(hasattr(c, 'min_length') and c.min_length == 7 for c in param.constraints.metadata)
-        has_max = any(hasattr(c, 'max_length') and c.max_length == 7 for c in param.constraints.metadata)
-        has_pattern = any(hasattr(c, 'pattern') for c in param.constraints.metadata)
-        
-        assert has_min
-        assert has_max
-        assert has_pattern
-        assert param.ui.label == "Theme Color"
-        assert param.ui.description is not None
+        assert len(patterns) == 1
+        assert patterns[0] == r'.*@company\.com$'  # New pattern, not Email pattern
+        assert len(max_lens) == 1
+        assert max_lens[0] == 254  # max_length preserved
 
 
-class TestRealWorldDomainForms:
-    """Real-world forms using composed domain types."""
+class TestMultiLevelComposition:
+    """Test deeply nested type compositions."""
     
-    def test_user_registration_form(self):
-        """Complete registration form with composed types."""
-        @dataclass
-        class RegistrationForm:
-            username: LabeledUsername
-            email: LabeledEmail
-            password: SecurePassword
-            age: LabeledAge
-            bio: LongBio | None = None
-        
-        params = analyze_dataclass(RegistrationForm)
-        
-        # Username
-        assert params[0].ui.label == "Username"
-        assert params[0].constraints is not None
-        
-        # Email
-        assert params[1].widget_type == "Email"
-        assert params[1].ui.label == "Email Address"
-        
-        # Password
-        assert params[2].ui.is_password is True
-        assert params[2].ui.label == "Password"
-        
-        # Age
-        assert params[3].ui.label == "Age"
-        has_ge = any(hasattr(c, 'ge') for c in params[3].constraints.metadata)
-        has_le = any(hasattr(c, 'le') for c in params[3].constraints.metadata)
-        assert has_ge and has_le
-        
-        # Bio (optional)
-        assert params[4].optional is not None
-        assert params[4].ui.rows == 5
-    
-    def test_media_settings_form(self):
-        """Settings form with multiple sliders."""
-        @dataclass
-        class MediaSettings:
-            volume: VolumeSlider = 50
-            brightness: BrightnessSlider = 75
-            opacity: OpacitySlider = 1.0
-            theme: ThemeColor = "#3B82F6"
-        
-        params = analyze_dataclass(MediaSettings)
-        
-        # All should be sliders
-        assert params[0].ui.is_slider is True
-        assert params[1].ui.is_slider is True
-        assert params[2].ui.is_slider is True
-        
-        # All should have labels
-        assert params[0].ui.label == "Volume"
-        assert params[1].ui.label == "Brightness"
-        assert params[2].ui.label == "Opacity"
-        
-        # Theme should be color picker
-        assert params[3].widget_type == "Color"
-        
-        # All should have defaults
-        assert params[0].default == 50
-        assert params[1].default == 75
-        assert params[2].default == 1.0
-        assert params[3].default == "#3B82F6"
-    
-    def test_content_creation_form(self):
-        """Blog post form with string compositions."""
-        @dataclass
-        class BlogPostForm:
-            title: Annotated[ShortRequired, Label("Post Title"), Placeholder("Enter title")]
-            slug: Annotated[Slug, Label("URL Slug"), Placeholder("my-post-title")]
-            excerpt: Annotated[MediumRequired, Rows(3), Label("Excerpt")]
-            content: Annotated[LongString, Rows(10), Label("Content")]
-            author_email: ShortEmail
-        
-        params = analyze_dataclass(BlogPostForm)
-        
-        # Title - short required with UI
-        title_has_min = any(hasattr(c, 'min_length') and c.min_length == 1 for c in params[0].constraints.metadata)
-        title_has_max = any(hasattr(c, 'max_length') and c.max_length == 50 for c in params[0].constraints.metadata)
-        assert title_has_min and title_has_max
-        assert params[0].ui.label == "Post Title"
-        
-        # Slug - with pattern
-        slug_has_pattern = any(hasattr(c, 'pattern') for c in params[1].constraints.metadata)
-        assert slug_has_pattern
-        assert params[1].ui.label == "URL Slug"
-        
-        # Excerpt - medium with rows
-        assert params[2].ui.rows == 3
-        
-        # Content - long with many rows
-        assert params[3].ui.rows == 10
-        
-        # Email - short variant
-        assert params[4].widget_type == "Email"
-        email_has_max = any(hasattr(c, 'max_length') and c.max_length == 100 for c in params[4].constraints.metadata)
-        assert email_has_max
-
-
-class TestComplexNesting:
-    """Test very deep nesting scenarios."""
-    
-    def test_five_level_composition(self):
-        """Five levels of composition."""
+    def test_four_level_composition(self):
+        """Four levels of composition work correctly."""
         Level1: TypeAlias = Annotated[int, Field(ge=0)]
         Level2: TypeAlias = Annotated[Level1, Field(le=100)]
         Level3: TypeAlias = Annotated[Level2, Slider()]
-        Level4: TypeAlias = Annotated[Level3, Label("Value")]
-        Level5: TypeAlias = Annotated[Level4, Description("Adjust the value")]
+        Level4: TypeAlias = Annotated[Level3, Label("Brightness")]
         
-        param = analyze_type(Level5, name="val")
+        param = analyze_type(Level4, name="brightness")
         
         # All constraints merged
-        has_ge = any(hasattr(c, 'ge') and c.ge == 0 for c in param.constraints.metadata)
-        has_le = any(hasattr(c, 'le') and c.le == 100 for c in param.constraints.metadata)
+        ge_vals = [c.ge for c in param.constraints.metadata if hasattr(c, 'ge')]
+        le_vals = [c.le for c in param.constraints.metadata if hasattr(c, 'le')]
         
-        assert has_ge
-        assert has_le
+        assert ge_vals == [0]
+        assert le_vals == [100]
         
-        # All UI merged
+        # All UI metadata merged
+        assert param.ui is not None
+        assert param.ui.is_slider is True
+        assert param.ui.label == "Brightness"
+    
+    def test_multi_level_with_override(self):
+        """Multi-level with constraint override."""
+        Level1: TypeAlias = Annotated[int, Field(ge=0, le=100)]
+        Level2: TypeAlias = Annotated[Level1, Field(ge=10)]  # Override ge
+        Level3: TypeAlias = Annotated[Level2, Label("Value")]
+        
+        param = analyze_type(Level3, name="value")
+        
+        ge_vals = [c.ge for c in param.constraints.metadata if hasattr(c, 'ge')]
+        le_vals = [c.le for c in param.constraints.metadata if hasattr(c, 'le')]
+        
+        assert ge_vals == [10]  # Overridden
+        assert le_vals == [100]  # Preserved
+        assert param.ui.label == "Value"
+    
+    def test_five_level_string_composition(self):
+        """Five levels of string composition."""
+        Level1: TypeAlias = Annotated[str, Field(min_length=1)]
+        Level2: TypeAlias = Annotated[Level1, Field(max_length=100)]
+        Level3: TypeAlias = Annotated[Level2, Field(pattern=r'^[A-Z]')]
+        Level4: TypeAlias = Annotated[Level3, Label("Name")]
+        Level5: TypeAlias = Annotated[Level4, Description("Must start with capital")]
+        
+        param = analyze_type(Level5, name="name")
+        
+        min_lens = [c.min_length for c in param.constraints.metadata if hasattr(c, 'min_length')]
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        patterns = [c.pattern for c in param.constraints.metadata if hasattr(c, 'pattern')]
+        
+        assert min_lens == [1]
+        assert max_lens == [100]
+        assert patterns == [r'^[A-Z]']
+        assert param.ui.label == "Name"
+        assert param.ui.description == "Must start with capital"
+
+
+class TestRealWorldScenarios:
+    """Test real-world composition patterns."""
+    
+    def test_percentage_type_library(self):
+        """Build Percentage type from PositiveInt."""
+        PositiveInt: TypeAlias = Annotated[int, Field(ge=0)]
+        Percentage: TypeAlias = Annotated[PositiveInt, Field(le=100)]
+        PercentageSlider: TypeAlias = Annotated[Percentage, Slider()]
+        
+        param = analyze_type(PercentageSlider, name="volume")
+        
+        ge_vals = [c.ge for c in param.constraints.metadata if hasattr(c, 'ge')]
+        le_vals = [c.le for c in param.constraints.metadata if hasattr(c, 'le')]
+        
+        assert ge_vals == [0]
+        assert le_vals == [100]
+        assert param.ui.is_slider is True
+    
+    def test_username_type_with_ui(self):
+        """Username with pattern, lengths, and UI."""
+        Username: TypeAlias = Annotated[
+            str,
+            Field(min_length=3, max_length=20, pattern=r'^[a-zA-Z0-9_]+$')
+        ]
+        LabeledUsername: TypeAlias = Annotated[
+            Username,
+            Label("Username"),
+            Description("3-20 chars, alphanumeric + underscore"),
+            Placeholder("Enter username")
+        ]
+        
+        param = analyze_type(LabeledUsername, name="username")
+        
+        # Constraints
+        min_lens = [c.min_length for c in param.constraints.metadata if hasattr(c, 'min_length')]
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        patterns = [c.pattern for c in param.constraints.metadata if hasattr(c, 'pattern')]
+        
+        assert min_lens == [3]
+        assert max_lens == [20]
+        assert patterns == [r'^[a-zA-Z0-9_]+$']
+        
+        # UI
+        assert param.ui.label == "Username"
+        assert param.ui.description == "3-20 chars, alphanumeric + underscore"
+        assert param.ui.placeholder == "Enter username"
+    
+    def test_validated_email_with_description(self):
+        """ValidEmail with constraints and UI."""
+        ValidEmail: TypeAlias = Annotated[
+            Email,
+            Field(max_length=254),
+            Description("We'll never share your email")
+        ]
+        
+        param = analyze_type(ValidEmail, name="email")
+        
+        assert param.widget_type == "Email"
+        
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        assert max_lens == [254]
+        
+        assert param.ui is not None
+        assert param.ui.description == "We'll never share your email"
+    
+    def test_complete_registration_form_types(self):
+        """Complete type library for registration form."""
+        PositiveInt: TypeAlias = Annotated[int, Field(ge=0)]
+        Percentage: TypeAlias = Annotated[PositiveInt, Field(le=100)]
+        PercentageSlider: TypeAlias = Annotated[Percentage, Slider()]
+        
+        Username: TypeAlias = Annotated[
+            str,
+            Field(min_length=3, max_length=20, pattern=r'^[a-zA-Z0-9_]+$'),
+            Label("Username"),
+            Placeholder("Enter username")
+        ]
+        
+        ValidEmail: TypeAlias = Annotated[
+            Email,
+            Field(max_length=254),
+            Description("We'll never share your email")
+        ]
+        
+        Age: TypeAlias = Annotated[PositiveInt, Field(le=120), Label("Age")]
+        
+        # Test each type
+        username_param = analyze_type(Username, name="username")
+        email_param = analyze_type(ValidEmail, name="email")
+        age_param = analyze_type(Age, name="age")
+        volume_param = analyze_type(PercentageSlider, name="volume")
+        
+        # Username
+        assert username_param.ui.label == "Username"
+        assert username_param.ui.placeholder == "Enter username"
+        
+        # Email
+        assert email_param.widget_type == "Email"
+        assert email_param.ui.description == "We'll never share your email"
+        
+        # Age
+        age_le = [c.le for c in age_param.constraints.metadata if hasattr(c, 'le')]
+        assert age_le == [120]
+        assert age_param.ui.label == "Age"
+        
+        # Volume
+        assert volume_param.ui.is_slider is True
+        volume_ge = [c.ge for c in volume_param.constraints.metadata if hasattr(c, 'ge')]
+        volume_le = [c.le for c in volume_param.constraints.metadata if hasattr(c, 'le')]
+        assert volume_ge == [0]
+        assert volume_le == [100]
+
+
+class TestEdgeCases:
+    """Test edge cases and boundary conditions."""
+    
+    def test_empty_base_type(self):
+        """Base type with no constraints."""
+        Base: TypeAlias = str
+        Enhanced: TypeAlias = Annotated[Base, Field(max_length=50)]
+        
+        param = analyze_type(Enhanced, name="text")
+        
+        max_lens = [c.max_length for c in param.constraints.metadata if hasattr(c, 'max_length')]
+        assert max_lens == [50]
+    
+    def test_multiple_overrides_in_chain(self):
+        """Multiple overrides of same constraint."""
+        Level1: TypeAlias = Annotated[int, Field(ge=0)]
+        Level2: TypeAlias = Annotated[Level1, Field(ge=10)]
+        Level3: TypeAlias = Annotated[Level2, Field(ge=20)]
+        
+        param = analyze_type(Level3, name="value")
+        
+        ge_vals = [c.ge for c in param.constraints.metadata if hasattr(c, 'ge')]
+        assert ge_vals == [20], "Should have only the last ge value"
+    
+    def test_constraint_and_ui_together(self):
+        """Constraint and UI in same Annotated level."""
+        Type: TypeAlias = Annotated[
+            int,
+            Field(ge=0, le=100),
+            Slider(),
+            Label("Value")
+        ]
+        
+        param = analyze_type(Type, name="value")
+        
+        ge_vals = [c.ge for c in param.constraints.metadata if hasattr(c, 'ge')]
+        le_vals = [c.le for c in param.constraints.metadata if hasattr(c, 'le')]
+        
+        assert ge_vals == [0]
+        assert le_vals == [100]
         assert param.ui.is_slider is True
         assert param.ui.label == "Value"
-        assert param.ui.description == "Adjust the value"
-    
-    def test_branching_composition(self):
-        """Same base type, different UI branches."""
-        Base: TypeAlias = Annotated[int, Field(ge=0, le=100)]
-        
-        SliderVersion: TypeAlias = Annotated[Base, Slider(), Label("Slider")]
-        SteppedVersion: TypeAlias = Annotated[Base, Step(10), Label("Stepped")]
-        PlainVersion: TypeAlias = Annotated[Base, Label("Plain")]
-        
-        slider_param = analyze_type(SliderVersion, name="s")
-        stepped_param = analyze_type(SteppedVersion, name="st")
-        plain_param = analyze_type(PlainVersion, name="p")
-        
-        # All have same constraints
-        for p in [slider_param, stepped_param, plain_param]:
-            has_ge = any(hasattr(c, 'ge') for c in p.constraints.metadata)
-            has_le = any(hasattr(c, 'le') for c in p.constraints.metadata)
-            assert has_ge and has_le
-        
-        # Different UI
-        assert slider_param.ui.is_slider is True
-        assert stepped_param.ui.step == 10
-        assert plain_param.ui.is_slider is False
-    
-    def test_mixed_special_types_and_composition(self):
-        """Special types with deep composition."""
-        # Image with size limit hint
-        SmallImage: TypeAlias = Annotated[
-            ImageFile,
-            Label("Profile Picture"),
-            Description("Max 2MB, square format recommended")
-        ]
-        
-        # Email with work domain
-        WorkEmail: TypeAlias = Annotated[
-            ValidatedEmail,
-            Field(pattern=r'.*@company\.com$'),
-            Label("Work Email"),
-            Description("Must be a company email address")
-        ]
-        
-        @dataclass
-        class EmployeeForm:
-            photo: SmallImage
-            email: WorkEmail
-        
-        params = analyze_dataclass(EmployeeForm)
-        
-        # Image
-        assert params[0].widget_type == "ImageFile"
-        assert params[0].ui.label == "Profile Picture"
-        assert params[0].ui.description is not None
-        
-        # Email with multiple patterns
-        assert params[1].widget_type == "Email"
-        pattern_count = sum(1 for c in params[1].constraints.metadata if hasattr(c, 'pattern'))
-        assert pattern_count >= 2, "Should have Email pattern + company domain pattern"
-
-
-class TestTypeLibraryReuse:
-    """Test that type library enables DRY principle."""
-    
-    def test_percentage_reused_multiple_times(self):
-        """Same Percentage type used in multiple contexts."""
-        @dataclass
-        class Form:
-            cpu_usage: Annotated[Percentage, Label("CPU Usage")]
-            memory_usage: Annotated[Percentage, Label("Memory Usage")]
-            disk_usage: Annotated[Percentage, Label("Disk Usage")]
-        
-        params = analyze_dataclass(Form)
-        
-        # All three have same constraints
-        for param in params:
-            has_ge = any(hasattr(c, 'ge') and c.ge == 0 for c in param.constraints.metadata)
-            has_le = any(hasattr(c, 'le') and c.le == 100 for c in param.constraints.metadata)
-            assert has_ge and has_le
-        
-        # But different labels
-        assert params[0].ui.label == "CPU Usage"
-        assert params[1].ui.label == "Memory Usage"
-        assert params[2].ui.label == "Disk Usage"
-    
-    def test_age_type_consistency(self):
-        """Age type used across multiple forms maintains consistency."""
-        @dataclass
-        class UserForm:
-            age: Age
-        
-        @dataclass
-        class EmployeeForm:
-            employee_age: Age
-        
-        @dataclass
-        class StudentForm:
-            student_age: Age
-        
-        user_params = analyze_dataclass(UserForm)
-        employee_params = analyze_dataclass(EmployeeForm)
-        student_params = analyze_dataclass(StudentForm)
-        
-        # All should have exact same constraints
-        for params in [user_params, employee_params, student_params]:
-            has_ge = any(hasattr(c, 'ge') and c.ge == 0 for c in params[0].constraints.metadata)
-            has_le = any(hasattr(c, 'le') and c.le == 120 for c in params[0].constraints.metadata)
-            assert has_ge and has_le
 
 
 if __name__ == "__main__":
