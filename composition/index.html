@@ -1140,17 +1140,23 @@
 </span></code></pre></div>
 <hr />
 <h2 id="best-practices">Best Practices</h2>
-<p><strong>DO:</strong>
-- Build reusable constraint libraries
-- Override constraints for stricter validation
-- Layer constraints from general to specific</p>
-<p><strong>WHEN OVERRIDING PATTERNS:</strong>
-- You'll lose the original widget type
-- Consider combining patterns manually instead
-- Or use two-layer validation (UI + business logic)</p>
-<p><strong>DON'T:</strong>
-- Expect multiple patterns to coexist (last wins)
-- Create contradictory constraints (e.g., <code>ge=100, le=50</code>)</p>
+<p><strong>DO:</strong></p>
+<ul>
+<li>Build reusable constraint libraries</li>
+<li>Override constraints for stricter validation</li>
+<li>Layer constraints from general to specific</li>
+</ul>
+<p><strong>WHEN OVERRIDING PATTERNS:</strong></p>
+<ul>
+<li>You'll lose the original widget type</li>
+<li>Consider combining patterns manually instead</li>
+<li>Or use two-layer validation (UI + business logic)</li>
+</ul>
+<p><strong>DON'T:</strong></p>
+<ul>
+<li>Expect multiple patterns to coexist (last wins)</li>
+<li>Create contradictory constraints (e.g., <code>ge=100, le=50</code>)</li>
+</ul>
 <hr />
 
 
