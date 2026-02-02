@@ -2,16 +2,6 @@
 
 pytypeinput uses Pydantic's `Field` to add validation constraints to parameters.
 
-**Quick navigation:**
-- [String Constraints](#string-constraints) - min/max length, patterns
-- [Integer Constraints](#integer-constraints) - ge, le, gt, lt
-- [Float Constraints](#float-constraints) - decimal ranges
-- [Date Constraints](#date-constraints) - date ranges ← NUEVO
-- [Time Constraints](#time-constraints) - time ranges ← NUEVO
-- [List Constraints](#list-constraints) - list length, item validation
-- [Combined Constraints](#combined-constraints) - multiple constraints
-- [Type Composition](#advanced-type-composition) - reusable types
-
 ## String Constraints
 
 ### Min/Max Length
@@ -180,92 +170,6 @@ print(params[0].constraints)  # Field(gt=-273.15)
         height="150" 
         frameborder="0"
         style="border: 1px solid #ddd; border-radius: 4px;"></iframe>
-
-
-## Date Constraints
-
-### Date Range (ge/le)
-
-Constrain date values with greater-or-equal (`ge`) and less-or-equal (`le`):
-```python
-from dataclasses import dataclass
-from datetime import date
-from pytypeinput import Field, Annotated, analyze_dataclass
-
-@dataclass
-class EventForm:
-    start_date: Annotated[date, Field(ge=date(2024, 1, 1), le=date(2024, 12, 31))]
-    birthday: Annotated[date, Field(le=date(2010, 12, 31))]  # Must be 14+ years old
-
-params = analyze_dataclass(EventForm)
-
-print(params[0].constraints)  # Field(ge=date(2024, 1, 1), le=date(2024, 12, 31))
-print(params[1].constraints)  # Field(le=date(2010, 12, 31))
-```
-
-**HTML Renderer Demo:**
-
-<iframe src="../demos/date_constraints.html" 
-        width="100%" 
-        height="220" 
-        frameborder="0"
-        style="border: 1px solid #ddd; border-radius: 4px;"></iframe>
-
-Try selecting dates outside the allowed range!
-
-### Strict Date Bounds (gt/lt)
-
-Use greater-than (`gt`) and less-than (`lt`) for exclusive date bounds:
-```python
-from dataclasses import dataclass
-from datetime import date
-from pytypeinput import Field, Annotated, analyze_dataclass
-
-@dataclass
-class BookingForm:
-    check_in: Annotated[date, Field(gt=date.today())]  # Must be future date
-    check_out: Annotated[date, Field(gt=date.today())]
-
-params = analyze_dataclass(BookingForm)
-
-print(params[0].constraints)  # Field(gt=date.today())
-```
-
-**HTML Renderer Demo:**
-
-<iframe src="../demos/date_strict.html" 
-        width="100%" 
-        height="220" 
-        frameborder="0"
-        style="border: 1px solid #ddd; border-radius: 4px;"></iframe>
-
-Today's date is not allowed!
-
-### Practical Examples
-```python
-from datetime import date
-
-# Age validation (must be 18+)
-today = date.today()
-eighteen_years_ago = date(today.year - 18, today.month, today.day)
-
-@dataclass
-class RegistrationForm:
-    birthday: Annotated[date, Field(le=eighteen_years_ago)]
-
-# Event in 2024 only
-@dataclass
-class ConferenceForm:
-    event_date: Annotated[date, Field(
-        ge=date(2024, 1, 1),
-        le=date(2024, 12, 31)
-    )]
-
-# Future events only
-@dataclass
-class AppointmentForm:
-    appointment_date: Annotated[date, Field(gt=date.today())]
-```
 
 ## List Constraints
 

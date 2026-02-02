@@ -341,8 +341,6 @@ DATE_MACROS = '''
                         {%- if is_optional and not optional_enabled %} disabled{%- endif %}
                         {%- if value is not none %} value="{{ value }}"{%- endif %}
                         {%- if list_item_default is defined %} data-default="{{ list_item_default }}"{%- endif %}
-                        {%- if min is not none %} min="{{ min }}"{%- endif %}
-                        {%- if max is not none %} max="{{ max }}"{%- endif %}
                     >
                 </div>
             </div>
@@ -368,8 +366,6 @@ DATE_MACROS = '''
             class="pytypeinput-temporal-real"
             {%- if is_optional and not optional_enabled %} disabled{%- endif %}
             {%- if default is not none %} value="{{ default }}"{%- endif %}
-            {%- if min is not none %} min="{{ min }}"{%- endif %}
-            {%- if max is not none %} max="{{ max }}"{%- endif %}
         >
     </div>
 {%- endmacro -%}
