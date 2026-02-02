@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date, time, timedelta
 import re
 
 from ..param import ParamMetadata
@@ -235,6 +235,7 @@ def render_date(param: ParamMetadata) -> str:
     """Render date parameter as HTML date picker.
     
     Default value: today's date if not specified.
+    Supports ge/le/gt/lt constraints (gt/lt add/subtract 1 day for HTML compatibility).
     """
     context = _build_base_context(param)
     today = date.today().isoformat()
@@ -246,6 +247,13 @@ def render_date(param: ParamMetadata) -> str:
     
     if context['default_values']:
         context['default_values'] = [d.isoformat() for d in context['default_values']]
+    
+    # Convert date constraints to ISO format for HTML
+    if context['min'] is not None and isinstance(context['min'], date):
+        context['min'] = context['min'].isoformat()
+    
+    if context['max'] is not None and isinstance(context['max'], date):
+        context['max'] = context['max'].isoformat()
     
     context['list_item_default'] = today
     

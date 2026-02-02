@@ -428,6 +428,17 @@ class CompositionSlider:
     volume: PercentageSlider
     brightness: PercentageSlider
 
+# ===== DATE & TIME CONSTRAINT DEMOS =====
+
+@dataclass
+class DateConstraints:
+    start_date: Annotated[date, Field(ge=date(2024, 1, 1), le=date(2024, 12, 31))]
+    birthday: Annotated[date, Field(le=date(2010, 12, 31))]
+
+@dataclass
+class DateStrict:
+    check_in: Annotated[date, Field(gt=date(2024, 1, 1))]
+    check_out: Annotated[date, Field(gt=date(2024, 1, 1))]
 
 if __name__ == "__main__":
     print("Generating demos...")
@@ -504,5 +515,8 @@ if __name__ == "__main__":
 
     create_dataclass_demo(CompositionBasic, "composition_basic.html")
     create_dataclass_demo(CompositionSlider, "composition_slider.html")
+
+    create_dataclass_demo(DateConstraints, "date_constraints.html")
+    create_dataclass_demo(DateStrict, "date_strict.html")
 
     print(f"✅ Done! Demos saved to {DEMOS_DIR}")
