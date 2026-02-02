@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ListBool Form</title>
+    <title>CompositionSlider Form</title>
     <style>:root {
     --pytypeinput-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     --pytypeinput-field-margin: 0;
@@ -897,27 +897,28 @@
     </style>
 </head>
 <body>
-    <div class="pytypeinput-field pytypeinput-list-field" data-list-name="permissions">
-    <label class="pytypeinput-label">
-            Permissions
-        </label><div class="pytypeinput-list-wrapper">
-            <div class="pytypeinput-list-container"><div class="pytypeinput-list-item-wrapper">
-        <div class="pytypeinput-list-item">
-            <div class="pytypeinput-list-item-content">
-                <label class="pytypeinput-toggle-switch">
-                    <input 
-                        type="checkbox"
-                        name="permissions[]"
-                        class="pytypeinput-checkbox pytypeinput-list-input"
-                    >
-                    <span class="pytypeinput-toggle-slider"></span>
-                </label>
-            </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
-        </div>
-    </div></div>
-            <button type="button" class="pytypeinput-list-add-btn">+</button>
-        </div></div>
+    <div class="pytypeinput-field">
+    <label for="volume" class="pytypeinput-label">
+            Volume
+        </label><div class="pytypeinput-slider-wrapper">
+        <input 
+            type="range"
+            id="volume"
+            name="volume"
+            class="pytypeinput-slider" value="0" min="0" max="100"
+            step="1"
+        ><output class="pytypeinput-slider-value" for="volume">0</output></div></div>
+<div class="pytypeinput-field">
+    <label for="brightness" class="pytypeinput-label">
+            Volume
+        </label><div class="pytypeinput-slider-wrapper">
+        <input 
+            type="range"
+            id="brightness"
+            name="brightness"
+            class="pytypeinput-slider" value="0" min="0" max="100"
+            step="1"
+        ><output class="pytypeinput-slider-value" for="brightness">0</output></div></div>
     <script>document.addEventListener('DOMContentLoaded', function() {
     
     const Validators = {

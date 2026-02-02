@@ -923,7 +923,7 @@
         id="phone"
         name="phone"
         class="pytypeinput-input"
-        autocomplete="off"
+        autocomplete="off" disabled
     ></div></div>
 <div class="pytypeinput-field">
     <div class="pytypeinput-optional-header">
@@ -942,12 +942,12 @@
             id="age"
             name="age"
             class="pytypeinput-input"
-            autocomplete="off"
+            autocomplete="off" disabled
             step="1"
         >
         <div class="pytypeinput-number-controls">
-            <button type="button" class="pytypeinput-number-btn pytypeinput-number-up">▲</button>
-            <button type="button" class="pytypeinput-number-btn pytypeinput-number-down">▼</button>
+            <button type="button" class="pytypeinput-number-btn pytypeinput-number-up" disabled>▲</button>
+            <button type="button" class="pytypeinput-number-btn pytypeinput-number-down" disabled>▼</button>
         </div>
     </div></div></div>
 <div class="pytypeinput-field">
@@ -966,13 +966,13 @@
             type="text"
             class="pytypeinput-input pytypeinput-temporal-display"
             placeholder="dd/mm/yyyy"
-            readonly value="2026-01-28"
+            readonly disabled value="2026-02-02"
         >
         <input 
             type="date"
             id="birthday"
             name="birthday"
-            class="pytypeinput-temporal-real" value="2026-01-28"
+            class="pytypeinput-temporal-real" disabled value="2026-02-02"
         >
     </div></div></div>
 <div class="pytypeinput-field">
@@ -991,7 +991,7 @@
             type="checkbox"
             id="verified"
             name="verified"
-            class="pytypeinput-checkbox"
+            class="pytypeinput-checkbox" disabled
         >
         <span class="pytypeinput-toggle-slider"></span>
     </label></div></div>
@@ -1194,8 +1194,14 @@
         
         if (!targetContent) return;
         
+        const inputs = targetContent.querySelectorAll('input, select, textarea, button');
+        
         if (toggle.checked) {
             targetContent.classList.remove('hidden');
+            
+            inputs.forEach(input => {
+                input.disabled = false;
+            });
             
             const field = targetContent.closest('.pytypeinput-field');
             const input = targetContent.querySelector('.pytypeinput-input:not(.pytypeinput-list-input), .pytypeinput-checkbox, .pytypeinput-select');
@@ -1207,6 +1213,10 @@
             targetContent.querySelectorAll('.pytypeinput-list-input').forEach(validateListItem);
         } else {
             targetContent.classList.add('hidden');
+            
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
             
             const field = targetContent.closest('.pytypeinput-field');
             DOM.removeError(field);

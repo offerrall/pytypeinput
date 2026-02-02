@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ListBool Form</title>
+    <title>CompositionBasic Form</title>
     <style>:root {
     --pytypeinput-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     --pytypeinput-field-margin: 0;
@@ -897,27 +897,23 @@
     </style>
 </head>
 <body>
-    <div class="pytypeinput-field pytypeinput-list-field" data-list-name="permissions">
-    <label class="pytypeinput-label">
-            Permissions
-        </label><div class="pytypeinput-list-wrapper">
-            <div class="pytypeinput-list-container"><div class="pytypeinput-list-item-wrapper">
-        <div class="pytypeinput-list-item">
-            <div class="pytypeinput-list-item-content">
-                <label class="pytypeinput-toggle-switch">
-                    <input 
-                        type="checkbox"
-                        name="permissions[]"
-                        class="pytypeinput-checkbox pytypeinput-list-input"
-                    >
-                    <span class="pytypeinput-toggle-slider"></span>
-                </label>
-            </div>
-            <button type="button" class="pytypeinput-list-remove">×</button>
+    <div class="pytypeinput-field">
+    <label for="completion" class="pytypeinput-label">
+            Completion
+        </label><div class="pytypeinput-number-wrapper">
+        <input 
+            type="number"
+            id="completion"
+            name="completion"
+            class="pytypeinput-input"
+            autocomplete="off" data-min="0" data-max="100"
+            step="1"
+        >
+        <div class="pytypeinput-number-controls">
+            <button type="button" class="pytypeinput-number-btn pytypeinput-number-up">▲</button>
+            <button type="button" class="pytypeinput-number-btn pytypeinput-number-down">▼</button>
         </div>
     </div></div>
-            <button type="button" class="pytypeinput-list-add-btn">+</button>
-        </div></div>
     <script>document.addEventListener('DOMContentLoaded', function() {
     
     const Validators = {

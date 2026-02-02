@@ -905,13 +905,13 @@
             type="text"
             class="pytypeinput-input pytypeinput-temporal-display"
             placeholder="dd/mm/yyyy"
-            readonly value="2026-01-28"
+            readonly value="2026-02-02"
         >
         <input 
             type="date"
             id="birthday"
             name="birthday"
-            class="pytypeinput-temporal-real" value="2026-01-28"
+            class="pytypeinput-temporal-real" value="2026-02-02"
         >
     </div></div>
     <script>document.addEventListener('DOMContentLoaded', function() {
@@ -1113,8 +1113,14 @@
         
         if (!targetContent) return;
         
+        const inputs = targetContent.querySelectorAll('input, select, textarea, button');
+        
         if (toggle.checked) {
             targetContent.classList.remove('hidden');
+            
+            inputs.forEach(input => {
+                input.disabled = false;
+            });
             
             const field = targetContent.closest('.pytypeinput-field');
             const input = targetContent.querySelector('.pytypeinput-input:not(.pytypeinput-list-input), .pytypeinput-checkbox, .pytypeinput-select');
@@ -1126,6 +1132,10 @@
             targetContent.querySelectorAll('.pytypeinput-list-input').forEach(validateListItem);
         } else {
             targetContent.classList.add('hidden');
+            
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
             
             const field = targetContent.closest('.pytypeinput-field');
             DOM.removeError(field);
