@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import date, time
 from enum import Enum
 from typing import Literal
+from typing_extensions import TypeAlias
 from pytypeinput import (
     Field, Annotated, Label, Description, PatternMessage,
     Email, Color, File, ImageFile, VideoFile, AudioFile, 
@@ -412,6 +413,22 @@ class RendererComplete:
         Description("Receive updates and promotions")
     ] = True
 
+# ===== COMPOSITION DEMOS =====
+
+PositiveInt: TypeAlias = Annotated[int, Field(ge=0)]
+Percentage: TypeAlias = Annotated[PositiveInt, Field(le=100)]
+PercentageSlider: TypeAlias = Annotated[Percentage, Slider(), Label("Volume")]
+
+@dataclass
+class CompositionBasic:
+    completion: Percentage
+
+@dataclass
+class CompositionSlider:
+    volume: PercentageSlider
+    brightness: PercentageSlider
+
+
 if __name__ == "__main__":
     print("Generating demos...")
 
@@ -484,5 +501,8 @@ if __name__ == "__main__":
     create_dataclass_demo(RendererBasic, "renderer_basic.html")
     create_dataclass_demo(RendererIndividual, "renderer_individual.html")
     create_dataclass_demo(RendererComplete, "renderer_complete.html")
+
+    create_dataclass_demo(CompositionBasic, "composition_basic.html")
+    create_dataclass_demo(CompositionSlider, "composition_slider.html")
 
     print(f"✅ Done! Demos saved to {DEMOS_DIR}")

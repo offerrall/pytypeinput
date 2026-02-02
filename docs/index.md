@@ -112,6 +112,7 @@ pip install pytypeinput[html]
 **Validation & UI:**
 
 - **[Constraints](constraints.md)** - `Field(min=, max=, pattern=)` for validation
+- **[Type Composition](composition.md)** - Build complex types from simple ones
 - **[UI Metadata](ui-metadata.md)** - Custom labels, descriptions, placeholders, sliders
 
 **Renderers:**

@@ -289,3 +289,21 @@ params = analyze_dataclass(RegistrationForm)
         height="250" 
         frameborder="0"
         style="border: 1px solid #ddd; border-radius: 4px;"></iframe>
+
+## Advanced: Type Composition
+
+You can build reusable constraint combinations:
+```python
+# Define once
+PositiveInt = Annotated[int, Field(ge=0)]
+Percentage = Annotated[PositiveInt, Field(le=100)]
+
+# Use everywhere
+@dataclass
+class Settings:
+    volume: Percentage
+    brightness: Percentage
+    contrast: Percentage
+```
+
+See **[Type Composition](composition.md)** for more details.

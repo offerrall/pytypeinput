@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StrConstraints Form</title>
+    <title>CompositionSlider Form</title>
     <style>:root {
     --pytypeinput-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     --pytypeinput-field-margin: 0;
@@ -898,25 +898,27 @@
 </head>
 <body>
     <div class="pytypeinput-field">
-    <label for="username" class="pytypeinput-label">
-            Username
-        </label><input 
-        type="text"
-        id="username"
-        name="username"
-        class="pytypeinput-input"
-        autocomplete="off" minlength="3" data-minlength="3" maxlength="20" data-maxlength="20"
-    ></div>
+    <label for="volume" class="pytypeinput-label">
+            Volume
+        </label><div class="pytypeinput-slider-wrapper">
+        <input 
+            type="range"
+            id="volume"
+            name="volume"
+            class="pytypeinput-slider" value="0" min="0" max="100"
+            step="1"
+        ><output class="pytypeinput-slider-value" for="volume">0</output></div></div>
 <div class="pytypeinput-field">
-    <label for="bio" class="pytypeinput-label">
-            Bio
-        </label><input 
-        type="text"
-        id="bio"
-        name="bio"
-        class="pytypeinput-input"
-        autocomplete="off" maxlength="500" data-maxlength="500"
-    ></div>
+    <label for="brightness" class="pytypeinput-label">
+            Volume
+        </label><div class="pytypeinput-slider-wrapper">
+        <input 
+            type="range"
+            id="brightness"
+            name="brightness"
+            class="pytypeinput-slider" value="0" min="0" max="100"
+            step="1"
+        ><output class="pytypeinput-slider-value" for="brightness">0</output></div></div>
     <script>document.addEventListener('DOMContentLoaded', function() {
     
     const Validators = {

@@ -55,6 +55,7 @@ nav:
       - Optionals: optionals.md
       - Choices: choices.md
   - Constraints: constraints.md
+  - Type Composition: composition.md
   - UI Metadata: ui-metadata.md
   - HTML Renderer: html-renderer.md
   - API Reference: api.md

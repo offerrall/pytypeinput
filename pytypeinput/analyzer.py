@@ -33,7 +33,9 @@ def _detect_special_type(field_info: FieldInfo | None) -> str | None:
     
     for constraint in field_info.metadata:
         if hasattr(constraint, 'pattern'):
-            return SPECIAL_TYPES.get(constraint.pattern)
+            widget = SPECIAL_TYPES.get(constraint.pattern)
+            if widget:
+                return widget
     
     return None
 
@@ -84,7 +86,6 @@ def _extract_dropdown(annotation, param_name: str, default) -> tuple[Any, Choice
         args = get_args(annotation)
         base = args[0]
         
-        # Check for Dropdown marker
         for m in args[1:]:
             if isinstance(m, Dropdown):
                 if not callable(m.options_function):
@@ -135,7 +136,6 @@ def _extract_dropdown(annotation, param_name: str, default) -> tuple[Any, Choice
                 )
                 return base, choice_metadata, default
 
-    # Check for Enum (use base which is unwrapped)
     if isinstance(base, type) and issubclass(base, Enum):
         opts = tuple(e.value for e in base)
         
@@ -166,7 +166,6 @@ def _extract_dropdown(annotation, param_name: str, default) -> tuple[Any, Choice
         )
         return base_type, choice_metadata, default
 
-    # Check for Literal (use base which is unwrapped)
     if get_origin(base) is Literal:
         opts = get_args(base)
         
@@ -268,18 +267,38 @@ def _extract_optional(annotation, default, param_name: str) -> tuple[Any, Option
     
     return non_none_types[0], OptionalMetadata(enabled=enabled)
 
-
 def _extract_field(annotation) -> FieldInfo | None:
     if get_origin(annotation) is not Annotated:
         return None
     
     args = get_args(annotation)
+    all_fields = []
     
     for m in args[1:]:
         if isinstance(m, FieldInfo):
-            return m
+            all_fields.append(m)
     
-    return None
+    base_type = args[0]
+    if get_origin(base_type) is Annotated:
+        base_field = _extract_field(base_type)
+        if base_field:
+            all_fields.append(base_field)
+    
+    if not all_fields:
+        return None
+    
+    all_metadata = []
+    for field in all_fields:
+        all_metadata.extend(field.metadata)
+    
+    result = FieldInfo(
+        annotation=all_fields[0].annotation,
+        default=all_fields[0].default,
+        default_factory=all_fields[0].default_factory,
+    )
+    result.metadata = all_metadata
+    
+    return result
 
 
 def _extract_list(annotation, param_name: str, enable_warnings: bool = True) -> tuple[Any, ListMetadata | None]:
@@ -334,17 +353,14 @@ def _extract_list(annotation, param_name: str, enable_warnings: bool = True) -> 
 
 def _validate_slider_compatibility(param_name: str, ui_metadata: UIMetadata, base_type: type, 
                                     constraints: FieldInfo | None) -> None:
-    """Validate Slider widget requirements."""
     if not ui_metadata or not ui_metadata.is_slider:
         return
     
-    # Only int/float
     if base_type not in (int, float):
         raise TypeError(
             f"Parameter '{param_name}': Slider only supported for int/float, got {base_type.__name__}"
         )
     
-    # Requires min AND max
     if not constraints:
         raise TypeError(
             f"Parameter '{param_name}': Slider requires Field(ge=..., le=...) constraints"
@@ -357,7 +373,6 @@ def _validate_slider_compatibility(param_name: str, ui_metadata: UIMetadata, bas
         raise TypeError(
             f"Parameter '{param_name}': Slider requires both min (ge=/gt=) and max (le=/lt=) values"
         )
-
 
 def analyze_parameter(param: inspect.Parameter, enable_warnings: bool = True) -> ParamMetadata:
     if param.kind == inspect.Parameter.VAR_POSITIONAL:
@@ -380,6 +395,8 @@ def analyze_parameter(param: inspect.Parameter, enable_warnings: bool = True) ->
     
     original_annotation = annotation
     
+    constraints = _extract_field(annotation)
+    
     dropdown_default = None if list_metadata is not None else default
     annotation, choices, extracted_default = _extract_dropdown(annotation, param.name, dropdown_default)
     
@@ -393,7 +410,6 @@ def analyze_parameter(param: inspect.Parameter, enable_warnings: bool = True) ->
                 for item in default
             ]
     
-    constraints = _extract_field(annotation)
     widget_type = _detect_special_type(constraints)
     
     item_ui_metadata = _extract_ui_metadata(original_annotation)
@@ -455,19 +471,12 @@ def analyze_parameter(param: inspect.Parameter, enable_warnings: bool = True) ->
         ui=ui_metadata,
     )
 
-
 def analyze_function(func: Callable[..., Any], enable_warnings: bool = True) -> list[ParamMetadata]:
     sig = inspect.signature(func)
     return [analyze_parameter(param, enable_warnings) for param in sig.parameters.values()]
 
 
 def analyze_type(annotation: Any, name: str = "field", enable_warnings: bool = True) -> ParamMetadata:
-    """Analyze a type annotation directly without a function parameter.
-    
-    Example:
-        >>> Username = Annotated[str, Field(min_length=3), Label("Username")]
-        >>> metadata = analyze_type(Username, name="username")
-    """
     fake_param = inspect.Parameter(
         name=name,
         kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
@@ -503,26 +512,6 @@ def analyze_pydantic_model(model: type[BaseModel], enable_warnings: bool = True)
     return params
 
 def analyze_dataclass(cls: type, enable_warnings: bool = True) -> list[ParamMetadata]:
-    """Analyze Python dataclass fields.
-    
-    Supports standard dataclasses with type hints, defaults, and pytypeinput
-    metadata (Label, Description, Field constraints, etc.).
-    
-    Args:
-        cls: Dataclass type to analyze.
-        enable_warnings: Whether to emit warnings (default: True).
-    
-    Returns:
-        List of parameter metadata for each field.
-    
-    Raises:
-        TypeError: If cls is not a dataclass.
-    
-    Limitations:
-        - field(default_factory=...) is evaluated at analysis time
-        - field(init=False) fields are skipped
-        - ClassVar fields are skipped
-    """
     from dataclasses import is_dataclass, fields, MISSING
     
     if not is_dataclass(cls):
@@ -565,21 +554,6 @@ def analyze_dataclass(cls: type, enable_warnings: bool = True) -> list[ParamMeta
 
 
 def analyze_class_init(cls: type, enable_warnings: bool = True) -> list[ParamMetadata]:
-    """Analyze class __init__ method parameters.
-    
-    Extracts parameters from a class constructor, excluding 'self'.
-    Supports all pytypeinput features (Field constraints, Label, Description, etc.).
-    
-    Args:
-        cls: Class type to analyze.
-        enable_warnings: Whether to emit warnings (default: True).
-    
-    Returns:
-        List of parameter metadata for each __init__ parameter (excluding self).
-    
-    Raises:
-        TypeError: If cls doesn't have __init__ or has unsupported parameter types.
-    """
     if not hasattr(cls, '__init__'):
         raise TypeError(f"'{cls.__name__}' has no __init__ method")
     
