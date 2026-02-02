@@ -4,7 +4,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/pytypeinput.svg)](https://pypi.org/project/pytypeinput/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-712%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-727%20passed-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Extract structured metadata from Python type hints.**
@@ -59,6 +59,7 @@ pip install pytypeinput[html]
 - **[Optionals](https://offerrall.github.io/pytypeinput/optionals/)**: `Type | None` with toggle switches
 - **[Choices](https://offerrall.github.io/pytypeinput/choices/)**: `Literal`, `Enum`, `Dropdown(func)`
 - **[Constraints](https://offerrall.github.io/pytypeinput/constraints/)**: `Field(min=, max=, pattern=)` for validation
+- **[Type Composition](https://offerrall.github.io/pytypeinput/composition/)**: Build complex types from simple ones
 - **[UI Metadata](https://offerrall.github.io/pytypeinput/ui-metadata/)**: Custom labels, descriptions, placeholders, sliders, etc.
 
 **Renderers:**
