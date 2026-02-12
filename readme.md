@@ -1,4 +1,4 @@
-# PyTypeInput
+# PyTypeInput 1.0.0
 
 **Define parameters with Python type hints. Get complete UI metadata automatically.**
 
