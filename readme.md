@@ -1,4 +1,4 @@
-# PyTypeInput 1.0.0
+# PyTypeInput 1.0.1
 
 [![PyPI version](https://img.shields.io/pypi/v/pytypeinput)](https://pypi.org/project/pytypeinput/)
 [![Python](https://img.shields.io/pypi/pyversions/pytypeinput)](https://pypi.org/project/pytypeinput/)

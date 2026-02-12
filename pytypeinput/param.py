@@ -3,6 +3,11 @@ from typing import Any
 from .helpers import serialize_value
 
 
+def _clean(d: dict) -> dict:
+    """Remove keys where value is None."""
+    return {k: v for k, v in d.items() if v is not None}
+
+
 @dataclass(frozen=True)
 class ConstraintsMetadata:
     ge: int | float | None = None
@@ -14,7 +19,7 @@ class ConstraintsMetadata:
     pattern: str | None = None
 
     def to_dict(self) -> dict:
-        return {
+        return _clean({
             "ge": self.ge,
             "le": self.le,
             "gt": self.gt,
@@ -22,7 +27,7 @@ class ConstraintsMetadata:
             "min_length": self.min_length,
             "max_length": self.max_length,
             "pattern": self.pattern,
-        }
+        })
 
 
 @dataclass(frozen=True)
@@ -31,10 +36,10 @@ class ListMetadata:
     max_length: int | None = None
 
     def to_dict(self) -> dict:
-        return {
+        return _clean({
             "min_length": self.min_length,
             "max_length": self.max_length,
-        }
+        })
 
 
 @dataclass(frozen=True)
@@ -52,10 +57,10 @@ class ChoiceMetadata:
     options_function: Any = None
 
     def to_dict(self) -> dict:
-        return {
+        return _clean({
             "enum_class": serialize_value(self.enum_class),
             "options": serialize_value(self.options),
-        }
+        })
 
 
 @dataclass(frozen=True)
@@ -69,15 +74,22 @@ class ItemUIMetadata:
     rows: int | None = None
 
     def to_dict(self) -> dict:
-        return {
-            "step": self.step,
-            "is_password": self.is_password,
-            "is_slider": self.is_slider,
-            "show_slider_value": self.show_slider_value,
-            "placeholder": self.placeholder,
-            "pattern_message": self.pattern_message,
-            "rows": self.rows,
-        }
+        d = {}
+        if self.step is not None:
+            d["step"] = self.step
+        if self.is_password:
+            d["is_password"] = True
+        if self.is_slider:
+            d["is_slider"] = True
+        if not self.show_slider_value:
+            d["show_slider_value"] = False
+        if self.placeholder is not None:
+            d["placeholder"] = self.placeholder
+        if self.pattern_message is not None:
+            d["pattern_message"] = self.pattern_message
+        if self.rows is not None:
+            d["rows"] = self.rows
+        return d
 
 
 @dataclass(frozen=True)
@@ -86,10 +98,10 @@ class ParamUIMetadata:
     description: str | None = None
 
     def to_dict(self) -> dict:
-        return {
+        return _clean({
             "label": self.label,
             "description": self.description,
-        }
+        })
 
 
 @dataclass(frozen=True)
@@ -107,18 +119,34 @@ class ParamMetadata:
     _validator: Any = None
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "name": self.name,
             "param_type": self.param_type.__name__,
-            "default": serialize_value(self.default),
-            "constraints": self.constraints.to_dict() if self.constraints else None,
-            "widget_type": self.widget_type,
-            "optional": self.optional.to_dict() if self.optional else None,
-            "list": self.list.to_dict() if self.list else None,
-            "choices": self.choices.to_dict() if self.choices else None,
-            "item_ui": self.item_ui.to_dict() if self.item_ui else None,
-            "param_ui": self.param_ui.to_dict() if self.param_ui else None,
         }
+        default = serialize_value(self.default)
+        if default is not None:
+            d["default"] = default
+        if self.constraints:
+            cd = self.constraints.to_dict()
+            if cd:
+                d["constraints"] = cd
+        if self.widget_type is not None:
+            d["widget_type"] = self.widget_type
+        if self.optional is not None:
+            d["optional"] = self.optional.to_dict()
+        if self.list is not None:
+            d["list"] = self.list.to_dict()
+        if self.choices is not None:
+            d["choices"] = self.choices.to_dict()
+        if self.item_ui is not None:
+            uid = self.item_ui.to_dict()
+            if uid:
+                d["item_ui"] = uid
+        if self.param_ui is not None:
+            pud = self.param_ui.to_dict()
+            if pud:
+                d["param_ui"] = pud
+        return d
 
     def refresh_choices(self) -> "ParamMetadata":
         if self.choices is None or self.choices.options_function is None:

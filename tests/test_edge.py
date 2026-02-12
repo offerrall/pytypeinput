@@ -205,34 +205,34 @@ class TestEnumDefaultEdgeCases:
 
 
 # =============================================================================
-# 6. to_dict — choices is None (no choices path)
+# 6. to_dict — choices absent (no choices path)
 # =============================================================================
 
 class TestToDictNoChoices:
     def test_plain_int_no_choices(self):
         d = analyze_type(int, "n", 42).to_dict()
-        assert d["choices"] is None
+        assert "choices" not in d
 
     def test_plain_str_no_choices(self):
         d = analyze_type(str, "s").to_dict()
-        assert d["choices"] is None
+        assert "choices" not in d
 
     def test_constrained_no_choices(self):
         d = analyze_type(Annotated[int, Field(ge=0, le=100)], "n").to_dict()
-        assert d["choices"] is None
-        assert d["constraints"] is not None
+        assert "choices" not in d
+        assert "constraints" in d
 
 
 # =============================================================================
-# 7. to_dict — all None metadata fields
+# 7. to_dict — all None metadata fields omitted
 # =============================================================================
 
 class TestToDictAllNone:
     def test_minimal_to_dict(self):
         d = analyze_type(int, "x").to_dict()
-        assert d["constraints"] is None
-        assert d["optional"] is None
-        assert d["list"] is None
-        assert d["choices"] is None
-        assert d["item_ui"] is None
-        assert d["param_ui"] is None
+        assert "constraints" not in d
+        assert "optional" not in d
+        assert "list" not in d
+        assert "choices" not in d
+        assert "item_ui" not in d
+        assert "param_ui" not in d

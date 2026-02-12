@@ -35,14 +35,14 @@ def test_basic_int():
     d = analyze_type(int, "age").to_dict()
     assert d["name"] == "age"
     assert d["param_type"] == "int"
-    assert d["default"] is None
+    assert "default" not in d
     assert d["widget_type"] == "Number"
-    assert d["choices"] is None
-    assert d["constraints"] is None
-    assert d["optional"] is None
-    assert d["list"] is None
-    assert d["item_ui"] is None
-    assert d["param_ui"] is None
+    assert "choices" not in d
+    assert "constraints" not in d
+    assert "optional" not in d
+    assert "list" not in d
+    assert "item_ui" not in d
+    assert "param_ui" not in d
 
 
 def test_basic_str():
@@ -102,7 +102,7 @@ def test_default_time():
 
 def test_default_none():
     d = analyze_type(str, "s", None).to_dict()
-    assert d["default"] is None
+    assert "default" not in d
 
 
 def test_enum_no_default():
@@ -137,7 +137,7 @@ def test_literal_str():
     d = analyze_type(Literal["a", "b", "c"], "x").to_dict()
     assert d["widget_type"] == "Dropdown"
     assert d["choices"]["options"] == ["a", "b", "c"]
-    assert d["choices"]["enum_class"] is None
+    assert "enum_class" not in d["choices"]
 
 
 def test_literal_int():
@@ -154,7 +154,7 @@ def test_dropdown():
     d = analyze_type(Annotated[str, Dropdown(colors)], "c").to_dict()
     assert d["widget_type"] == "Dropdown"
     assert d["choices"]["options"] == ["red", "green", "blue"]
-    assert d["choices"]["enum_class"] is None
+    assert "enum_class" not in d["choices"]
     assert "options_function" not in d["choices"]
 
 
@@ -193,9 +193,7 @@ def test_optional_enabled_marker():
 def test_list_plain():
     d = analyze_type(list[int], "nums").to_dict()
     assert d["param_type"] == "int"
-    assert d["list"] is not None
-    assert d["list"]["min_length"] is None
-    assert d["list"]["max_length"] is None
+    assert "list" in d
 
 
 def test_list_constrained():
@@ -273,4 +271,4 @@ def test_options_function_not_in_dict():
 
 def test_enum_class_none_for_literal():
     d = analyze_type(Literal["a", "b"], "x").to_dict()
-    assert d["choices"]["enum_class"] is None
+    assert "enum_class" not in d["choices"]
