@@ -1,239 +1,161 @@
-from typing import Annotated, Any
-
-from pydantic import BaseModel, model_validator, TypeAdapter
-from pydantic.config import ConfigDict
-from pydantic.fields import FieldInfo
+from dataclasses import dataclass
+from typing import Any
+from .helpers import serialize_value
 
 
-class _BaseMetadata(BaseModel):
-    """Base model that allows arbitrary types (like type objects)."""
-    
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+@dataclass(frozen=True)
+class ConstraintsMetadata:
+    ge: int | float | None = None
+    le: int | float | None = None
+    gt: int | float | None = None
+    lt: int | float | None = None
+    min_length: int | None = None
+    max_length: int | None = None
+    pattern: str | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "ge": self.ge,
+            "le": self.le,
+            "gt": self.gt,
+            "lt": self.lt,
+            "min_length": self.min_length,
+            "max_length": self.max_length,
+            "pattern": self.pattern,
+        }
 
 
-class ListMetadata(_BaseMetadata):
-    """Metadata for list parameters.
-    
-    Attributes:
-        constraints: Pydantic FieldInfo with min_length/max_length constraints.
-    """
-    
-    constraints: FieldInfo | None = None
+@dataclass(frozen=True)
+class ListMetadata:
+    min_length: int | None = None
+    max_length: int | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "min_length": self.min_length,
+            "max_length": self.max_length,
+        }
 
 
-class OptionalMetadata(BaseModel):
-    """Metadata for optional parameters.
-    
-    Attributes:
-        enabled: Whether the optional field is enabled by default.
-                 True if has a non-None default or OptionalEnabled marker.
-    """
-    
+@dataclass(frozen=True)
+class OptionalMetadata:
     enabled: bool = False
 
+    def to_dict(self) -> dict:
+        return {"enabled": self.enabled}
 
-class ChoiceMetadata(_BaseMetadata):
-    """Metadata for choice-based parameters (Enum, Literal, Dropdown).
-    
-    Attributes:
-        enum_class: The Enum class if parameter is an Enum type.
-        options_function: Function that returns options for Dropdown.
-        options: Tuple of available choice values.
-    """
-    
+
+@dataclass(frozen=True)
+class ChoiceMetadata:
+    options: tuple
     enum_class: type | None = None
     options_function: Any = None
-    options: tuple | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "enum_class": serialize_value(self.enum_class),
+            "options": serialize_value(self.options),
+        }
 
 
-class UIMetadata(BaseModel):
-    """UI customization metadata for parameters.
-    
-    Attributes:
-        step: Step increment for number inputs (default: 1).
-        is_password: Whether to render string input as password field.
-        is_slider: Whether to render number input as slider widget.
-        show_slider_value: Whether to display current value next to slider.
-        placeholder: Placeholder text for input fields.
-        pattern_message: Custom error message for pattern validation.
-        description: Help text displayed below the input field.
-        label: Custom label text (overrides parameter name).
-        rows: Number of visible rows for textarea (multi-line input).
-    """
-    
-    step: int | float = 1
+@dataclass(frozen=True)
+class ItemUIMetadata:
+    step: int | float | None = None
     is_password: bool = False
     is_slider: bool = False
     show_slider_value: bool = True
     placeholder: str | None = None
     pattern_message: str | None = None
-    description: str | None = None
-    label: str | None = None
     rows: int | None = None
 
+    def to_dict(self) -> dict:
+        return {
+            "step": self.step,
+            "is_password": self.is_password,
+            "is_slider": self.is_slider,
+            "show_slider_value": self.show_slider_value,
+            "placeholder": self.placeholder,
+            "pattern_message": self.pattern_message,
+            "rows": self.rows,
+        }
 
-class ParamMetadata(_BaseMetadata):
-    """Complete metadata for a function parameter.
-    
-    Stores all extracted information about a parameter including its type,
-    constraints, default value, and UI customizations.
-    
-    Attributes:
-        name: Parameter name.
-        param_type: Base Python type (int, str, bool, etc.).
-        default: Default value if provided.
-        constraints: Pydantic FieldInfo with validation constraints.
-        widget_type: Special widget type (Color, Email, ImageFile, etc.).
-        optional: Optional metadata if parameter is optional.
-        list: List metadata if parameter is a list.
-        choices: Choice metadata if parameter has fixed options.
-        ui: UI customization metadata.
-    """
-    
+
+@dataclass(frozen=True)
+class ParamUIMetadata:
+    label: str | None = None
+    description: str | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "label": self.label,
+            "description": self.description,
+        }
+
+
+@dataclass(frozen=True)
+class ParamMetadata:
     name: str
     param_type: type
-    default: Any = None
-    constraints: FieldInfo | None = None
+    default: Any | None = None
+    constraints: ConstraintsMetadata | None = None
     widget_type: str | None = None
     optional: OptionalMetadata | None = None
     list: ListMetadata | None = None
     choices: ChoiceMetadata | None = None
-    ui: UIMetadata | None = None
-    
-    def reload_choices(self, validate_default: bool = True) -> None:
-        """Reload choices from Dropdown function if available.
-        
-        Reloads options by calling the options_function and optionally validates
-        that the current default value is still in the new options.
-        
-        Args:
-            validate_default: If True (default), validates that current default
-                            is in the new options. If False, skips validation.
-        
-        Raises:
-            RuntimeError: If parameter has no choices or choices are static (Enum/Literal).
-            ValueError: If validate_default=True and default not in new options.
-            TypeError: If options function returns invalid type.
-        """
-        if self.choices is None:
-            raise RuntimeError(f"Parameter '{self.name}' has no choices to reload")
-        
-        if self.choices.options_function is None:
-            raise RuntimeError(
-                f"Parameter '{self.name}': Cannot reload choices. "
-                "Choices are static (Enum or Literal). Only Dropdown-based choices can be reloaded."
-            )
-        
-        try:
-            new_options = self.choices.options_function()
-        except Exception as e:
-            raise ValueError(f"Parameter '{self.name}': Failed to reload options: {e}")
-        
-        if not isinstance(new_options, (list, tuple)):
-            raise TypeError(
-                f"Parameter '{self.name}': Options function must return a list or tuple"
-            )
-        
-        if not new_options:
-            raise ValueError(f"Parameter '{self.name}': Options function returned empty list")
-        
-        new_options_tuple = tuple(new_options)
-        
-        if validate_default and self.default is not None:
-            if self.list is not None:
-                if isinstance(self.default, list):
-                    for item in self.default:
-                        if item not in new_options_tuple:
-                            raise ValueError(
-                                f"Parameter '{self.name}': default list item '{item}' "
-                                f"not in reloaded options. Available: {new_options_tuple}"
-                            )
-            else:
-                if self.default not in new_options_tuple:
-                    raise ValueError(
-                        f"Parameter '{self.name}': default value '{self.default}' "
-                        f"not in reloaded options. Available: {new_options_tuple}"
-                    )
-        
-        self.choices.options = new_options_tuple
-    
-    @model_validator(mode='after')
-    def validate_default(self):
-        """Validate that default value satisfies all constraints and choices."""
-        if self.default is None:
+    item_ui: ItemUIMetadata | None = None
+    param_ui: ParamUIMetadata | None = None
+    _validator: Any = None
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "param_type": self.param_type.__name__,
+            "default": serialize_value(self.default),
+            "constraints": self.constraints.to_dict() if self.constraints else None,
+            "widget_type": self.widget_type,
+            "optional": self.optional.to_dict() if self.optional else None,
+            "list": self.list.to_dict() if self.list else None,
+            "choices": self.choices.to_dict() if self.choices else None,
+            "item_ui": self.item_ui.to_dict() if self.item_ui else None,
+            "param_ui": self.param_ui.to_dict() if self.param_ui else None,
+        }
+
+    def refresh_choices(self) -> "ParamMetadata":
+        if self.choices is None or self.choices.options_function is None:
             return self
-        
-        if self.choices is not None:
-            self._validate_choice_default()
-        
-        if self.list is not None:
-            self._validate_list_default()
-            return self
-        
-        if self.constraints is not None:
-            self._validate_constraint_default()
-        
-        return self
-    
-    def _validate_choice_default(self):
-        """Validate default value is in available choices."""
-        if self.list is not None:
-            if not isinstance(self.default, list):
-                raise TypeError(f"Parameter '{self.name}': default must be a list")
-            
-            for item in self.default:
-                if self.choices.options is not None and item not in self.choices.options:
-                    raise ValueError(
-                        f"Parameter '{self.name}': default value '{item}' not in options"
-                    )
-        else:
-            if self.choices.enum_class is not None:
-                if self.choices.options is None or self.default not in self.choices.options:
-                    raise ValueError(
-                        f"Parameter '{self.name}': Enum default value '{self.default}' not in options"
-                    )
-            else:
-                if self.choices.options is not None and self.default not in self.choices.options:
-                    raise ValueError(
-                        f"Parameter '{self.name}': default '{self.default}' not in options"
-                    )
-    
-    def _validate_constraint_default(self):
-        """Validate default value satisfies pydantic constraints."""
+
         try:
-            TypeAdapter(Annotated[self.param_type, self.constraints]).validate_python(self.default)
+            new_opts = self.choices.options_function()
         except Exception as e:
+            raise ValueError(f"Dropdown function failed: {e}") from e
+
+        if not isinstance(new_opts, (list, tuple)):
+            raise TypeError("Dropdown function must return a list or tuple")
+
+        if not new_opts:
+            raise ValueError("Dropdown function returned empty list")
+
+        new_choices = ChoiceMetadata(
+            options=tuple(new_opts),
+            enum_class=self.choices.enum_class,
+            options_function=self.choices.options_function,
+        )
+
+        if self.default is not None and self.default not in new_choices.options:
             raise ValueError(
-                f"Parameter '{self.name}': default value does not satisfy constraints: {e}"
+                f"Default value {self.default!r} not in updated options: {new_choices.options}"
             )
-    
-    def _validate_list_default(self):
-        """Validate list default values satisfy all constraints."""
-        if not isinstance(self.default, list):
-            raise TypeError(f"Parameter '{self.name}': default must be a list")
-        
-        if self.list.constraints is not None:
-            try:
-                TypeAdapter(
-                    Annotated[list[self.param_type], self.list.constraints]
-                ).validate_python(self.default)
-            except Exception as e:
-                raise ValueError(
-                    f"Parameter '{self.name}': list default does not satisfy constraints: {e}"
-                )
-        
-        for item in self.default:
-            if not isinstance(item, self.param_type):
-                raise TypeError(
-                    f"Parameter '{self.name}': list item type mismatch in default"
-                )
-            
-            if self.constraints is not None:
-                try:
-                    TypeAdapter(
-                        Annotated[self.param_type, self.constraints]
-                    ).validate_python(item)
-                except Exception as e:
-                    raise ValueError(
-                        f"Parameter '{self.name}': list item does not satisfy constraints: {e}"
-                    )
+
+        return ParamMetadata(
+            name=self.name,
+            param_type=self.param_type,
+            default=self.default,
+            constraints=self.constraints,
+            widget_type=self.widget_type,
+            optional=self.optional,
+            list=self.list,
+            choices=new_choices,
+            item_ui=self.item_ui,
+            param_ui=self.param_ui,
+            _validator=self._validator,
+        )

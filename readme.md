@@ -1,91 +1,348 @@
-# pytypeinput 0.1.6
+# PyTypeInput
 
-<div align="center">
+**Define parameters with Python type hints. Get complete UI metadata automatically.**
 
-[![PyPI version](https://img.shields.io/pypi/v/pytypeinput.svg)](https://pypi.org/project/pytypeinput/)
-[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-742%20passed-brightgreen.svg)](tests/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+PyTypeInput analyzes standard Python type annotations and extracts everything a frontend needs to render forms: widget types, constraints, choices, labels, defaults, and validation — all from a single source of truth.
 
-**Extract structured metadata from Python type hints.**
+```
+1770+ tests · Zero runtime dependencies beyond Pydantic · Python 3.10+
+```
 
-</div>
+> 📘 For interactive documentation, live examples, and full integration, see [**FuncToWeb**](https://github.com/offerrall/functoweb) — which uses PyTypeInput as its core engine.
 
 ---
 
-pytypeinput analyzes Python type hints and extracts structured metadata. Use this metadata to build UIs, CLIs, config editors, or anything that needs input specifications.
+## Quick Example
+
 ```python
-from dataclasses import dataclass
-from pytypeinput import Field, Annotated, analyze_dataclass
+from typing import Annotated, Literal
+from pydantic import Field
+from pytypeinput import analyze_function
+from pytypeinput.types import Label, Slider, Email, Description, Rows
 
-@dataclass
-class User:
-    username: Annotated[str, Field(min_length=3, max_length=20)]
-    age: Annotated[int, Field(ge=18, le=120)]
-    bio: str | None = None
+def create_user(
+    name: Annotated[str, Label("Full Name"), Field(min_length=2, max_length=50)],
+    email: Email,
+    age: Annotated[int, Slider(), Field(ge=0, le=120)] = 25,
+    role: Literal["admin", "user", "viewer"] = "user",
+    bio: Annotated[str, Description("Short biography"), Rows(4)] | None = None,
+):
+    ...
 
-# Extract metadata
-params = analyze_dataclass(User)
-# Use it to build: HTML forms, CLIs, GUIs, validators...
+params = analyze_function(create_user)
+
+for p in params:
+    print(p.name, "→", p.widget_type)
+# name  → Text
+# email → Email
+# age   → Slider
+# role  → Dropdown
+# bio   → Textarea
 ```
 
-## Design Goals
+Each `ParamMetadata` object carries the full picture: type, default, widget, constraints, choices, labels, and a precompiled validator.
 
-- **Single source of truth** - Define once with type hints, use everywhere (forms, CLIs, validation)
-- **Minimal code** - Maximum features with minimum boilerplate
-- **Type-safe** - Full IDE autocomplete and type checking
-- **Pure Python** - Build UIs with Python code, not templates or DSLs
+---
 
 ## Installation
-Core only:
+
 ```bash
 pip install pytypeinput
 ```
-With HTML renderer:
-```bash
-pip install pytypeinput[html]
+
+---
+
+## What You Can Analyze
+
+PyTypeInput works with any of these sources — same output format regardless:
+
+```python
+from pytypeinput import analyze_function, analyze_pydantic_model, analyze_dataclass, analyze_class_init
+
+# Functions
+params = analyze_function(my_func)
+
+# Pydantic models
+params = analyze_pydantic_model(MyModel)
+
+# Dataclasses
+params = analyze_dataclass(MyDataclass)
+
+# Any class with __init__
+params = analyze_class_init(MyClass)
 ```
 
-**Requirements:** Python 3.10+ • Pydantic 2.0+
+---
 
-## Documentation
+## Type → Widget Mapping
 
-**[Complete Documentation](https://offerrall.github.io/pytypeinput)** with interactive examples
+| Type / Annotation | Widget | Notes |
+|---|---|---|
+| `str` | `Text` | |
+| `int`, `float` | `Number` | |
+| `bool` | `Checkbox` | |
+| `date` | `Date` | From `datetime` |
+| `time` | `Time` | From `datetime` |
+| `Enum`, `Literal` | `Dropdown` | Auto-extracts options |
+| `Dropdown(func)` | `Dropdown` | Dynamic options from callable |
+| `Slider()` | `Slider` | Requires `ge`/`le` constraints |
+| `IsPassword` | `Password` | |
+| `Rows(n)` | `Textarea` | Multiline text |
+| `Color` | `Color` | Hex color picker |
+| `Email` | `Email` | With built-in pattern |
+| `ImageFile`, `VideoFile`, `AudioFile`, `DataFile`, `TextFile`, `DocumentFile`, `File` | File variants | Each filtered by appropriate extensions |
 
-**Type System:**
-- **[Basic Types](https://offerrall.github.io/pytypeinput/basic-types/)**: `int`, `float`, `str`, `bool`, `date`, `time`
-- **[Special Types](https://offerrall.github.io/pytypeinput/special-types/)**: `Email`, `Color`, `File`, `ImageFile`, etc.
-- **[Lists](https://offerrall.github.io/pytypeinput/lists/)**: `list[Type]` with item and list-level validation
-- **[Optionals](https://offerrall.github.io/pytypeinput/optionals/)**: `Type | None` with toggle switches
-- **[Choices](https://offerrall.github.io/pytypeinput/choices/)**: `Literal`, `Enum`, `Dropdown(func)`
-- **[Constraints](https://offerrall.github.io/pytypeinput/constraints/)**: `Field(min=, max=, pattern=)` for validation
-- **[Type Composition](https://offerrall.github.io/pytypeinput/composition/)**: Build complex types from simple ones
-- **[UI Metadata](https://offerrall.github.io/pytypeinput/ui-metadata/)**: Custom labels, descriptions, placeholders, sliders, etc.
+---
 
-**Renderers:**
-- **[HTML Renderer](https://offerrall.github.io/pytypeinput/html-renderer/)** - Generate forms with client-side validation
+## UI Metadata
 
-**Reference:**
-- **[API Reference](https://offerrall.github.io/pytypeinput/api/)** - Complete API documentation
+Annotate parameters with descriptive metadata that frontends can use to render labels, placeholders, and more:
 
-## What pytypeinput does
+```python
+from pytypeinput.types import Label, Description, Placeholder, Step, Rows, PatternMessage
 
-✅ Extracts metadata from type hints  
-✅ Works with functions, dataclasses, Pydantic models, classes  
-✅ Optional HTML renderer with client-side validation  
-✅ Framework-agnostic  
+# Label and description
+name: Annotated[str, Label("Your Name"), Description("As it appears on your ID")]
 
-❌ No server-side validation  
-❌ No form submission handling
+# Placeholder text
+city: Annotated[str, Placeholder("e.g., Madrid")]
 
-**pytypeinput is a building block, not a complete solution.**
+# Numeric step
+quantity: Annotated[int, Step(5)]
 
-> **Validation:** Type hints validated when extracting metadata. HTML forms validate client-side. Server-side is your responsibility (use Pydantic with same type hints).
+# Textarea
+notes: Annotated[str, Rows(4)]
 
-## Contributing
+# Custom pattern error message
+code: Annotated[str, Field(pattern=r"^\d{4}$"), PatternMessage("Must be a 4-digit code")]
+```
 
-Found a bug or have a suggestion? [Open an issue](https://github.com/offerrall/pytypeinput/issues)
+---
+
+## Constraints
+
+Constraints come from Pydantic's `Field()` and are validated at analysis time and at runtime:
+
+```python
+from pydantic import Field
+
+# Numeric bounds
+age: Annotated[int, Field(ge=0, le=150)]
+price: Annotated[float, Field(gt=0, lt=10000)]
+
+# String constraints
+username: Annotated[str, Field(min_length=3, max_length=20)]
+hex_code: Annotated[str, Field(pattern=r"^#[0-9a-fA-F]{6}$")]
+```
+
+---
+
+## Choices
+
+Three ways to define a set of valid options:
+
+```python
+from enum import Enum
+from typing import Literal
+from pytypeinput.types import Dropdown
+
+# Enum — options extracted from values
+class Color(Enum):
+    RED = "red"
+    GREEN = "green"
+    BLUE = "blue"
+
+color: Color = Color.RED
+
+# Literal — inline options
+size: Literal["S", "M", "L", "XL"] = "M"
+
+# Dropdown — dynamic options from a callable
+def get_users():
+    return ["alice", "bob", "charlie"]
+
+user: Annotated[str, Dropdown(get_users)]
+```
+
+Dynamic dropdowns can be refreshed at any time via `param.refresh_choices()`.
+
+---
+
+## Lists
+
+Supports `list[T]` with optional length constraints. All item-level annotations (choices, constraints, UI) apply to each element:
+
+```python
+# Simple list
+tags: list[str]
+
+# List with length constraints
+scores: Annotated[list[int], Field(min_length=1, max_length=10)]
+
+# List of choices
+colors: list[Literal["red", "green", "blue"]]
+
+# Labels propagate from the inner type
+items: list[Annotated[str, Label("Tag Name")]]
+```
+
+> Nested lists (`list[list[...]]`) are not supported by design.
+
+---
+
+## Optional Fields
+
+`T | None` marks a field as optional. Control the initial toggle state with defaults or explicit markers:
+
+```python
+from pytypeinput.types import OptionalEnabled, OptionalDisabled
+
+# Toggle off by default (no default or default is None)
+nickname: str | None = None
+
+# Toggle on by default (has a non-None default)
+theme: str | None = "dark"
+
+# Explicit control
+notes: str | OptionalEnabled = None     # Toggle starts ON
+code: str | OptionalDisabled = "ABC"    # Toggle starts OFF
+```
+
+---
+
+## Validation
+
+`validate_value` coerces and validates runtime values (including raw strings from forms) against the analyzed metadata:
+
+```python
+from pytypeinput import analyze_function
+from pytypeinput.validate import validate_value
+
+params = analyze_function(my_func)
+meta = params[0]
+
+# Coerces types: "42" → 42, "true" → True, "2024-01-15" → date(...)
+value = validate_value(meta, "42")
+
+# Validates constraints, choices, and types
+# Raises ValueError or TypeError on invalid input
+```
+
+Coercion rules:
+- Strings to `int`, `float`, `bool`, `date`, `time`
+- Enum values or names to Enum instances
+- JSON form primitives to native Python types
+
+---
+
+## Output Format
+
+Every analyzed parameter returns a `ParamMetadata` dataclass:
+
+```python
+param.name           # "age"
+param.param_type     # int
+param.default        # 25
+param.widget_type    # "Slider"
+param.optional       # OptionalMetadata(enabled=False) or None
+param.constraints    # ConstraintsMetadata(ge=0, le=120, ...)
+param.choices        # ChoiceMetadata(options=(...), ...) or None
+param.item_ui        # ItemUIMetadata(is_slider=True, ...)
+param.param_ui       # ParamUIMetadata(label="Age", ...)
+param.list           # ListMetadata(min_length=..., ...) or None
+
+# Serialize to dict for JSON/frontend consumption
+param.to_dict()
+```
+
+---
+
+## Special Types
+
+Ready-to-use annotated types with built-in patterns and widget resolution:
+
+```python
+from pytypeinput.types import Color, Email, ImageFile, VideoFile, AudioFile, DataFile, TextFile, DocumentFile, File
+
+avatar: ImageFile          # Accepts .png, .jpg, .webp, etc.
+document: DocumentFile     # Accepts .pdf, .doc, .docx, etc.
+theme_color: Color         # Hex color with picker widget
+contact: Email             # Email with validation and placeholder
+attachment: File           # Any file
+```
+
+---
+
+## Composition
+
+Types can be layered using `Annotated` to build reusable, composable building blocks. Each layer can add constraints, UI metadata, or both — and later layers override earlier ones for the same attribute.
+
+```python
+# Base constrained types
+PositiveInt = Annotated[int, Field(ge=0)]
+BoundedInt = Annotated[int, Field(ge=0, le=100)]
+SmallStr = Annotated[str, Field(min_length=1, max_length=50)]
+LongStr = Annotated[str, Field(min_length=1, max_length=5000)]
+UnitFloat = Annotated[float, Field(ge=0.0, le=1.0)]
+
+# Add UI on top of constraints
+SliderInt = Annotated[BoundedInt, Slider()]
+SliderStep5 = Annotated[BoundedInt, Slider(), Step(5)]
+PasswordStr = Annotated[SmallStr, IsPassword()]
+TextAreaStr = Annotated[LongStr, Rows(10)]
+StepFloat = Annotated[UnitFloat, Step(0.01)]
+
+# Add labels/descriptions on top of everything
+LabeledSlider = Annotated[SliderInt, Label("Volume")]
+FullSlider = Annotated[SliderStep5, Label("Level"), Description("Set level")]
+FullPassword = Annotated[PasswordStr, Label("Password"), Description("Enter password"), Placeholder("********")]
+FullTextArea = Annotated[TextAreaStr, Label("Notes"), Description("Add notes"), Placeholder("Write...")]
+```
+
+Constraints merge across layers, and **later values override earlier ones** for the same attribute:
+
+```python
+# ge=0 from PositiveInt, le=100 added → both apply
+Annotated[PositiveInt, Field(le=100)]
+
+# ge=0 from PositiveInt, then ge=10 overrides → ge=10
+Annotated[PositiveInt, Field(ge=10)]
+
+# Three levels deep: ge=0 → ge=5 → ge=10 → final ge=10
+L1 = Annotated[int, Field(ge=0)]
+L2 = Annotated[L1, Field(ge=5)]
+L3 = Annotated[L2, Field(ge=10)]
+```
+
+This lets you define your type vocabulary once and reuse it across functions, models, and dataclasses without repeating constraints or UI hints.
+
+---
+
+## Project Structure
+
+```
+pytypeinput/
+├── analyzer.py          # Single-type analysis pipeline
+├── analyzers.py         # Function, Pydantic, dataclass, class analyzers
+├── validate.py          # Runtime validation and coercion
+├── param.py             # Metadata dataclasses
+├── types.py             # UI markers, special types, patterns
+├── helpers.py           # Annotated rebuilding, serialization
+└── extractors/          # 10-step pipeline (internal)
+    ├── validate_type_01.py
+    ├── validate_optional_02.py
+    ├── extract_param_ui_03.py
+    ├── extract_list_04.py
+    ├── extract_item_ui_05.py
+    ├── extract_choices_06.py
+    ├── extract_constraints_07.py
+    ├── validate_final_08.py
+    ├── resolve_widget_09.py
+    └── normalize_default_10.py
+```
+
+---
 
 ## License
 
-MIT • [Beltrán Offerrall](https://github.com/offerrall)
+MIT
