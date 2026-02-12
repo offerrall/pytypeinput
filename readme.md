@@ -9,10 +9,6 @@
 
 PyTypeInput analyzes standard Python type annotations and extracts everything a frontend needs to render forms: widget types, constraints, choices, labels, defaults, and validation — all from a single source of truth.
 
-```
-1770+ tests · Zero runtime dependencies beyond Pydantic · Python 3.10+
-```
-
 > For interactive documentation, live examples, and full integration, see [**FuncToWeb**](https://github.com/offerrall/functoweb) — which uses PyTypeInput as its core engine.
 
 ---
@@ -54,6 +50,13 @@ Each `ParamMetadata` object carries the full picture: type, default, widget, con
 ```bash
 pip install pytypeinput
 ```
+
+---
+
+## Dependencies
+
+- **Python** 3.10+
+- **Pydantic** 2.x
 
 ---
 
@@ -187,8 +190,34 @@ scores: Annotated[list[int], Field(min_length=1, max_length=10)]
 # List of choices
 colors: list[Literal["red", "green", "blue"]]
 
-# Labels propagate from the inner type
+# Item-level constraints apply to each element
+prices: list[Annotated[float, Field(ge=0.0, le=9999.99), Step(0.01)]]
+
+# Item-level slider with bounds
+volumes: list[Annotated[int, Slider(), Field(ge=0, le=100), Step(5)]]
+
+# List constraints + item constraints combined
+ratings: Annotated[list[Annotated[int, Field(ge=1, le=5)]], Field(min_length=1, max_length=10)]
+
+# Items with special types
+photos: list[ImageFile]
+emails: Annotated[list[Email], Field(min_length=1, max_length=5)]
+
+# Items with dropdown
+tags: list[Annotated[str, Dropdown(get_available_tags)]]
+```
+
+**Label and Description** on lists follow a priority rule: if `Label`/`Description` is on the outer list annotation, it wins. If not, it's read from the inner item type. This means you can define reusable labeled items and the label propagates automatically:
+
+```python
+# Label on the outer level → "Scores" is used
+scores: Annotated[list[int], Label("Scores")]
+
+# Label on the inner item → "Tag Name" propagates to the list
 items: list[Annotated[str, Label("Tag Name")]]
+
+# Both levels → outer "My Tags" wins over inner "Tag Name"
+items: Annotated[list[Annotated[str, Label("Tag Name")]], Label("My Tags")]
 ```
 
 > Nested lists (`list[list[...]]`) are not supported by design.
