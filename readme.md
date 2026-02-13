@@ -1,13 +1,13 @@
-# PyTypeInput 1.0.1
+# PyTypeInput 1.0.2
 
 [![PyPI version](https://img.shields.io/pypi/v/pytypeinput)](https://pypi.org/project/pytypeinput/)
 [![Python](https://img.shields.io/pypi/pyversions/pytypeinput)](https://pypi.org/project/pytypeinput/)
-[![Tests](https://img.shields.io/badge/tests-1789%2B-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-1778%2B-brightgreen)]()
 [![License](https://img.shields.io/pypi/l/pytypeinput)](https://pypi.org/project/pytypeinput/)
 
 **Define parameters with Python type hints. Get complete UI metadata automatically.**
 
-PyTypeInput analyzes standard Python type annotations and extracts everything a frontend needs to render forms: widget types, constraints, choices, labels, defaults, and validation — all from a single source of truth.
+PyTypeInput analyzes standard Python type annotations and extracts everything a frontend needs to render forms: types, constraints, choices, labels, defaults, and validation — all from a single source of truth.
 
 > For interactive documentation, live examples, and full integration, see [**FuncToWeb**](https://github.com/offerrall/functoweb) — which uses PyTypeInput as its core engine.
 
@@ -33,15 +33,15 @@ def create_user(
 params = analyze_function(create_user)
 
 for p in params:
-    print(p.name, "→", p.widget_type)
-# name  → Text
-# email → Email
-# age   → Slider
-# role  → Dropdown
-# bio   → Textarea
+    print(p.name, "→", p.param_type.__name__)
+# name  → str
+# email → str
+# age   → int
+# role  → str
+# bio   → str
 ```
 
-Each `ParamMetadata` object carries the full picture: type, default, widget, constraints, choices, labels, and a precompiled validator.
+Each `ParamMetadata` object carries the full picture: type, default, constraints, choices, labels, and a precompiled validator. The frontend resolves the appropriate widget from `param_type`, `item_ui`, `choices`, and `special_widget`.
 
 ---
 
@@ -82,23 +82,23 @@ params = analyze_class_init(MyClass)
 
 ---
 
-## Type → Widget Mapping
+## Widget Resolution
 
-| Type / Annotation | Widget | Notes |
+The frontend determines which widget to render based on the metadata fields:
+
+| Metadata | Widget | Example |
 |---|---|---|
-| `str` | `Text` | |
-| `int`, `float` | `Number` | |
-| `bool` | `Checkbox` | |
-| `date` | `Date` | From `datetime` |
-| `time` | `Time` | From `datetime` |
-| `Enum`, `Literal` | `Dropdown` | Auto-extracts options |
-| `Dropdown(func)` | `Dropdown` | Dynamic options from callable |
-| `Slider()` | `Slider` | Requires `ge`/`le` constraints |
-| `IsPassword` | `Password` | |
-| `Rows(n)` | `Textarea` | Multiline text |
-| `Color` | `Color` | Hex color picker |
-| `Email` | `Email` | With built-in pattern |
-| `ImageFile`, `VideoFile`, `AudioFile`, `DataFile`, `TextFile`, `DocumentFile`, `File` | File variants | Each filtered by appropriate extensions |
+| `param_type` = `str` | Text input | `name: str` |
+| `param_type` = `int` or `float` | Number input | `age: int` |
+| `param_type` = `bool` | Checkbox | `flag: bool` |
+| `param_type` = `date` | Date picker | `birthday: date` |
+| `param_type` = `time` | Time picker | `meeting: time` |
+| `choices` present | Dropdown | `Enum`, `Literal`, `Dropdown(func)` |
+| `item_ui.is_slider` = `True` | Slider | `Annotated[int, Slider()]` |
+| `item_ui.is_password` = `True` | Password | `Annotated[str, IsPassword()]` |
+| `item_ui.rows` set | Textarea | `Annotated[str, Rows(4)]` |
+| `special_widget` = `"Color"` | Color picker | `Color` |
+| `special_widget` = `"File"` | File input | `ImageFile`, `File`, etc. |
 
 ---
 
@@ -274,18 +274,19 @@ Coercion rules:
 Every analyzed parameter returns a `ParamMetadata` dataclass:
 
 ```python
-param.name           # "age"
-param.param_type     # int
-param.default        # 25
-param.widget_type    # "Slider"
-param.optional       # OptionalMetadata(enabled=False) or None
-param.constraints    # ConstraintsMetadata(ge=0, le=120, ...)
-param.choices        # ChoiceMetadata(options=(...), ...) or None
-param.item_ui        # ItemUIMetadata(is_slider=True, ...)
-param.param_ui       # ParamUIMetadata(label="Age", ...)
-param.list           # ListMetadata(min_length=..., ...) or None
+param.name             # "age"
+param.param_type       # int
+param.default          # 25
+param.special_widget   # "Color", "File", or None
+param.optional         # OptionalMetadata(enabled=False) or None
+param.constraints      # ConstraintsMetadata(ge=0, le=120, ...) or None
+param.choices          # ChoiceMetadata(options=(...), ...) or None
+param.item_ui          # ItemUIMetadata(is_slider=True, ...) or None
+param.param_ui         # ParamUIMetadata(label="Age", ...) or None
+param.list             # ListMetadata(min_length=..., ...) or None
 
 # Serialize to dict for JSON/frontend consumption
+# Only non-None fields are included
 param.to_dict()
 ```
 

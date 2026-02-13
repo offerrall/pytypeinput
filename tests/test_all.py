@@ -18,11 +18,7 @@ from pytypeinput.types import (
     COLOR_PATTERN, EMAIL_PATTERN,
     IMAGE_FILE_PATTERN, VIDEO_FILE_PATTERN, AUDIO_FILE_PATTERN,
     DATA_FILE_PATTERN, TEXT_FILE_PATTERN, DOCUMENT_FILE_PATTERN, ANY_FILE_PATTERN,
-    SPECIAL_TYPES, FILE_ACCEPT_EXTENSIONS, FILE_WIDGET_TYPES,
-    WIDGET_TYPE_COLOR, WIDGET_TYPE_EMAIL,
-    WIDGET_TYPE_IMAGE_FILE, WIDGET_TYPE_VIDEO_FILE, WIDGET_TYPE_AUDIO_FILE,
-    WIDGET_TYPE_DATA_FILE, WIDGET_TYPE_TEXT_FILE, WIDGET_TYPE_DOCUMENT_FILE,
-    WIDGET_TYPE_FILE,
+    SPECIAL_TYPES,
     _OptionalEnabledMarker, _OptionalDisabledMarker,
 )
 
@@ -244,7 +240,7 @@ def test_param_metadata_defaults():
     assert p.param_type is int
     assert p.default is None
     assert p.constraints is None
-    assert p.widget_type is None
+    assert p.special_widget is None
     assert p.optional is None
     assert p.list is None
     assert p.choices is None
@@ -380,15 +376,14 @@ def test_pattern_to_accept_color():
 
 
 EXPECTED_SPECIAL = [
-    (COLOR_PATTERN, WIDGET_TYPE_COLOR),
-    (EMAIL_PATTERN, WIDGET_TYPE_EMAIL),
-    (IMAGE_FILE_PATTERN, WIDGET_TYPE_IMAGE_FILE),
-    (VIDEO_FILE_PATTERN, WIDGET_TYPE_VIDEO_FILE),
-    (AUDIO_FILE_PATTERN, WIDGET_TYPE_AUDIO_FILE),
-    (DATA_FILE_PATTERN, WIDGET_TYPE_DATA_FILE),
-    (TEXT_FILE_PATTERN, WIDGET_TYPE_TEXT_FILE),
-    (DOCUMENT_FILE_PATTERN, WIDGET_TYPE_DOCUMENT_FILE),
-    (ANY_FILE_PATTERN, WIDGET_TYPE_FILE),
+    (COLOR_PATTERN, "Color"),
+    (IMAGE_FILE_PATTERN, "File"),
+    (VIDEO_FILE_PATTERN, "File"),
+    (AUDIO_FILE_PATTERN, "File"),
+    (DATA_FILE_PATTERN, "File"),
+    (TEXT_FILE_PATTERN, "File"),
+    (DOCUMENT_FILE_PATTERN, "File"),
+    (ANY_FILE_PATTERN, "File"),
 ]
 
 
@@ -398,65 +393,11 @@ def test_special_types_mapping(pattern, widget):
 
 
 def test_special_types_count():
-    assert len(SPECIAL_TYPES) == 9
+    assert len(SPECIAL_TYPES) == 8
 
 
-def test_file_widget_types_contains_all_files():
-    expected = {
-        WIDGET_TYPE_IMAGE_FILE, WIDGET_TYPE_VIDEO_FILE, WIDGET_TYPE_AUDIO_FILE,
-        WIDGET_TYPE_DATA_FILE, WIDGET_TYPE_TEXT_FILE, WIDGET_TYPE_DOCUMENT_FILE,
-        WIDGET_TYPE_FILE,
-    }
-    assert FILE_WIDGET_TYPES == expected
-
-
-def test_file_widget_types_excludes_non_files():
-    assert WIDGET_TYPE_COLOR not in FILE_WIDGET_TYPES
-    assert WIDGET_TYPE_EMAIL not in FILE_WIDGET_TYPES
-
-
-def test_file_accept_extensions_keys():
-    assert set(FILE_ACCEPT_EXTENSIONS.keys()) == FILE_WIDGET_TYPES
-
-
-def test_file_accept_any():
-    assert FILE_ACCEPT_EXTENSIONS[WIDGET_TYPE_FILE] == "*"
-
-
-def test_file_accept_image_has_png():
-    assert ".png" in FILE_ACCEPT_EXTENSIONS[WIDGET_TYPE_IMAGE_FILE]
-
-
-def test_file_accept_video_has_mp4():
-    assert ".mp4" in FILE_ACCEPT_EXTENSIONS[WIDGET_TYPE_VIDEO_FILE]
-
-
-def test_file_accept_audio_has_mp3():
-    assert ".mp3" in FILE_ACCEPT_EXTENSIONS[WIDGET_TYPE_AUDIO_FILE]
-
-
-def test_file_accept_data_has_csv():
-    assert ".csv" in FILE_ACCEPT_EXTENSIONS[WIDGET_TYPE_DATA_FILE]
-
-
-def test_file_accept_text_has_txt():
-    assert ".txt" in FILE_ACCEPT_EXTENSIONS[WIDGET_TYPE_TEXT_FILE]
-
-
-def test_file_accept_document_has_pdf():
-    assert ".pdf" in FILE_ACCEPT_EXTENSIONS[WIDGET_TYPE_DOCUMENT_FILE]
-
-
-def test_widget_type_values():
-    assert WIDGET_TYPE_COLOR == "Color"
-    assert WIDGET_TYPE_EMAIL == "Email"
-    assert WIDGET_TYPE_IMAGE_FILE == "ImageFile"
-    assert WIDGET_TYPE_VIDEO_FILE == "VideoFile"
-    assert WIDGET_TYPE_AUDIO_FILE == "AudioFile"
-    assert WIDGET_TYPE_DATA_FILE == "DataFile"
-    assert WIDGET_TYPE_TEXT_FILE == "TextFile"
-    assert WIDGET_TYPE_DOCUMENT_FILE == "DocumentFile"
-    assert WIDGET_TYPE_FILE == "File"
+def test_special_types_no_email():
+    assert EMAIL_PATTERN not in SPECIAL_TYPES
 
 
 def test_step():

@@ -110,7 +110,7 @@ class ParamMetadata:
     param_type: type
     default: Any | None = None
     constraints: ConstraintsMetadata | None = None
-    widget_type: str | None = None
+    special_widget: str | None = None
     optional: OptionalMetadata | None = None
     list: ListMetadata | None = None
     choices: ChoiceMetadata | None = None
@@ -130,8 +130,8 @@ class ParamMetadata:
             cd = self.constraints.to_dict()
             if cd:
                 d["constraints"] = cd
-        if self.widget_type is not None:
-            d["widget_type"] = self.widget_type
+        if self.special_widget is not None:
+            d["special_widget"] = self.special_widget
         if self.optional is not None:
             d["optional"] = self.optional.to_dict()
         if self.list is not None:
@@ -179,7 +179,7 @@ class ParamMetadata:
             param_type=self.param_type,
             default=self.default,
             constraints=self.constraints,
-            widget_type=self.widget_type,
+            special_widget=self.special_widget,
             optional=self.optional,
             list=self.list,
             choices=new_choices,

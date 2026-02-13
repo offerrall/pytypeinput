@@ -1,6 +1,5 @@
 import inspect
 from typing import Any
-from enum import Enum
 
 from .extractors.validate_type_01 import validate_type
 from .extractors.validate_optional_02 import extract_optional
@@ -10,7 +9,7 @@ from .extractors.extract_item_ui_05 import extract_item_ui
 from .extractors.extract_choices_06 import extract_choices
 from .extractors.extract_constraints_07 import extract_constraints
 from .extractors.validate_final_08 import validate_final
-from .extractors.resolve_widget_09 import resolve_widget_type
+from .extractors.resolve_widget_09 import resolve_special_widget
 from .extractors.normalize_default_10 import normalize_default
 
 from .param import ParamMetadata
@@ -51,10 +50,8 @@ def analyze_type(
         #     Returns precompiled TypeAdapter for constraints validation
         validator = validate_final(annotation, default, choices, constraints, list_meta, item_ui)
 
-        # 09. Resolve widget type
-        widget_type = resolve_widget_type(
-            annotation, constraints, choices, item_ui
-        )
+        # 09. Resolve special widget (Color, File)
+        special_widget = resolve_special_widget(constraints)
         
         # 10. Normalize default (Enum instances to values)
         normalized_default = normalize_default(default, choices, list_meta)
@@ -69,7 +66,7 @@ def analyze_type(
             item_ui=item_ui,
             choices=choices,
             constraints=constraints,
-            widget_type=widget_type,
+            special_widget=special_widget,
             _validator=validator,
         )
 

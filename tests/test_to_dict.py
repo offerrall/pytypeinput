@@ -36,7 +36,7 @@ def test_basic_int():
     assert d["name"] == "age"
     assert d["param_type"] == "int"
     assert "default" not in d
-    assert d["widget_type"] == "Number"
+    assert "special_widget" not in d
     assert "choices" not in d
     assert "constraints" not in d
     assert "optional" not in d
@@ -48,31 +48,31 @@ def test_basic_int():
 def test_basic_str():
     d = analyze_type(str, "name").to_dict()
     assert d["param_type"] == "str"
-    assert d["widget_type"] == "Text"
+    assert "special_widget" not in d
 
 
 def test_basic_bool():
     d = analyze_type(bool, "flag").to_dict()
     assert d["param_type"] == "bool"
-    assert d["widget_type"] == "Checkbox"
+    assert "special_widget" not in d
 
 
 def test_basic_float():
     d = analyze_type(float, "val").to_dict()
     assert d["param_type"] == "float"
-    assert d["widget_type"] == "Number"
+    assert "special_widget" not in d
 
 
 def test_basic_date():
     d = analyze_type(date, "d").to_dict()
     assert d["param_type"] == "date"
-    assert d["widget_type"] == "Date"
+    assert "special_widget" not in d
 
 
 def test_basic_time():
     d = analyze_type(time, "t").to_dict()
     assert d["param_type"] == "time"
-    assert d["widget_type"] == "Time"
+    assert "special_widget" not in d
 
 
 def test_default_int():
@@ -108,7 +108,7 @@ def test_default_none():
 def test_enum_no_default():
     d = analyze_type(Priority, "p").to_dict()
     assert d["param_type"] == "str"
-    assert d["widget_type"] == "Dropdown"
+    assert "special_widget" not in d
     assert d["choices"]["enum_class"] == "Priority"
     assert d["choices"]["options"] == ["low", "high"]
     assert "options_function" not in d["choices"]
@@ -135,7 +135,7 @@ def test_enum_int_values():
 
 def test_literal_str():
     d = analyze_type(Literal["a", "b", "c"], "x").to_dict()
-    assert d["widget_type"] == "Dropdown"
+    assert "special_widget" not in d
     assert d["choices"]["options"] == ["a", "b", "c"]
     assert "enum_class" not in d["choices"]
 
@@ -152,7 +152,7 @@ def test_literal_with_default():
 
 def test_dropdown():
     d = analyze_type(Annotated[str, Dropdown(colors)], "c").to_dict()
-    assert d["widget_type"] == "Dropdown"
+    assert "special_widget" not in d
     assert d["choices"]["options"] == ["red", "green", "blue"]
     assert "enum_class" not in d["choices"]
     assert "options_function" not in d["choices"]
@@ -204,20 +204,20 @@ def test_list_constrained():
 
 def test_slider():
     d = analyze_type(Annotated[int, Field(ge=0, le=100), Slider(), Step(5)], "v").to_dict()
-    assert d["widget_type"] == "Slider"
+    assert "special_widget" not in d
     assert d["item_ui"]["is_slider"] is True
     assert d["item_ui"]["step"] == 5
 
 
 def test_password():
     d = analyze_type(Annotated[str, IsPassword()], "pw").to_dict()
-    assert d["widget_type"] == "Password"
+    assert "special_widget" not in d
     assert d["item_ui"]["is_password"] is True
 
 
 def test_textarea():
     d = analyze_type(Annotated[str, Rows(5)], "bio").to_dict()
-    assert d["widget_type"] == "Textarea"
+    assert "special_widget" not in d
     assert d["item_ui"]["rows"] == 5
 
 
@@ -234,12 +234,12 @@ def test_label_and_description():
 
 def test_special_color():
     d = analyze_type(Color, "c").to_dict()
-    assert d["widget_type"] == "Color"
+    assert d["special_widget"] == "Color"
 
 
 def test_special_email():
     d = analyze_type(Email, "e").to_dict()
-    assert d["widget_type"] == "Email"
+    assert "special_widget" not in d
 
 
 def test_full_combo():
@@ -248,7 +248,7 @@ def test_full_combo():
     assert d["name"] == "v"
     assert d["param_type"] == "int"
     assert d["default"] == 50
-    assert d["widget_type"] == "Slider"
+    assert "special_widget" not in d
     assert d["optional"]["enabled"] is True
     assert d["constraints"]["ge"] == 0
     assert d["constraints"]["le"] == 100
