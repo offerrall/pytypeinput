@@ -10,14 +10,6 @@ def _file_pattern(*extensions):
     return r'(?i)^.+\.(' + '|'.join(exts) + r')$'
 
 
-def _pattern_to_accept(pattern: str) -> str:
-    match = re.search(r'\\\.\(([^)]+)\)', pattern)
-    if not match:
-        return '*'
-    extensions = match.group(1).split('|')
-    return ','.join(f'.{ext}' for ext in extensions)
-
-
 # ===== PATTERNS =====
 
 COLOR_PATTERN = r'^#(?:[0-9a-fA-F]{3}){1,2}$'

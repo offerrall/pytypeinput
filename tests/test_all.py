@@ -14,7 +14,7 @@ from pytypeinput.types import (
     Label, Description, Step, Placeholder, PatternMessage, Rows,
     Slider, IsPassword, Dropdown, OptionalEnabled, OptionalDisabled,
     Color, Email, ImageFile, VideoFile, AudioFile, DataFile, TextFile, DocumentFile, File,
-    _file_pattern, _pattern_to_accept,
+    _file_pattern,
     COLOR_PATTERN, EMAIL_PATTERN,
     IMAGE_FILE_PATTERN, VIDEO_FILE_PATTERN, AUDIO_FILE_PATTERN,
     DATA_FILE_PATTERN, TEXT_FILE_PATTERN, DOCUMENT_FILE_PATTERN, ANY_FILE_PATTERN,
@@ -331,48 +331,6 @@ def test_file_pattern_case_insensitive():
 def test_file_pattern_single_ext():
     p = _file_pattern("txt")
     assert "txt" in p
-
-
-def test_pattern_to_accept_image():
-    r = _pattern_to_accept(IMAGE_FILE_PATTERN)
-    assert ".png" in r and ".jpg" in r
-
-
-def test_pattern_to_accept_video():
-    r = _pattern_to_accept(VIDEO_FILE_PATTERN)
-    assert ".mp4" in r
-
-
-def test_pattern_to_accept_audio():
-    r = _pattern_to_accept(AUDIO_FILE_PATTERN)
-    assert ".mp3" in r
-
-
-def test_pattern_to_accept_data():
-    r = _pattern_to_accept(DATA_FILE_PATTERN)
-    assert ".csv" in r
-
-
-def test_pattern_to_accept_text():
-    r = _pattern_to_accept(TEXT_FILE_PATTERN)
-    assert ".txt" in r
-
-
-def test_pattern_to_accept_document():
-    r = _pattern_to_accept(DOCUMENT_FILE_PATTERN)
-    assert ".pdf" in r
-
-
-def test_pattern_to_accept_any():
-    assert _pattern_to_accept(ANY_FILE_PATTERN) == "*"
-
-
-def test_pattern_to_accept_no_match():
-    assert _pattern_to_accept("no_ext_here") == "*"
-
-
-def test_pattern_to_accept_color():
-    assert _pattern_to_accept(COLOR_PATTERN) == "*"
 
 
 EXPECTED_SPECIAL = [
