@@ -23,18 +23,9 @@ def resolve_widget_type(
     if choices is not None:
         return "Dropdown"
 
-    if item_ui is not None and item_ui.is_slider:
-        return "Slider"
-
-    if item_ui is not None and item_ui.is_password:
-        return "Password"
-
-    if item_ui is not None and item_ui.rows is not None:
-        return "Textarea"
-
     if constraints is not None and constraints.pattern:
         pattern = constraints.pattern
         if pattern in SPECIAL_TYPES:
             return SPECIAL_TYPES[pattern]
 
-    return _BASE_WIDGET_MAP.get(param_type)
+    return None
