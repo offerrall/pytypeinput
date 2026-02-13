@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/pytypeinput)](https://pypi.org/project/pytypeinput/)
 [![Python](https://img.shields.io/pypi/pyversions/pytypeinput)](https://pypi.org/project/pytypeinput/)
-[![Tests](https://img.shields.io/badge/tests-1770%2B-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-2030%2B-brightgreen)]()
 [![License](https://img.shields.io/pypi/l/pytypeinput)](https://pypi.org/project/pytypeinput/)
 
 **Define parameters with Python type hints. Get complete UI metadata automatically.**
