@@ -267,6 +267,11 @@ Coercion rules:
 - Enum values or names to Enum instances
 - JSON form primitives to native Python types
 
+**Important notes:**
+- `list[T]` parameters require a `list` or `tuple` as input. A single value is **not** auto-wrapped — pass `[value]` instead of `value`. Passing a non-list raises `TypeError`.
+- An empty list `[]` on a required `list[T]` raises `ValueError`. Use `list[T] | None` if the field should accept no items.
+- File types (`File`, `ImageFile`, etc.) are validated by filename extension only. Pass the filename as a string — the actual file handling is the caller's responsibility.
+
 ---
 
 ## Output Format
