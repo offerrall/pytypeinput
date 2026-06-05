@@ -1,7 +1,6 @@
 # PyTypeInput 1.0.2
 
 [![PyPI version](https://img.shields.io/pypi/v/pytypeinput)](https://pypi.org/project/pytypeinput/)
-[![Python](https://img.shields.io/pypi/pyversions/pytypeinput)](https://pypi.org/project/pytypeinput/)
 [![Tests](https://img.shields.io/badge/tests-2030%2B-brightgreen)]()
 [![License](https://img.shields.io/pypi/l/pytypeinput)](https://pypi.org/project/pytypeinput/)
 
@@ -9,7 +8,7 @@
 
 PyTypeInput analyzes standard Python type annotations and extracts everything a frontend needs to render forms: types, constraints, choices, labels, defaults, and validation — all from a single source of truth.
 
-> For interactive documentation, live examples, and full integration, see [**FuncToWeb**](https://github.com/offerrall/functoweb) — which uses PyTypeInput as its core engine.
+> For interactive documentation, examples, and full integration, see [**FuncToWeb**](https://github.com/offerrall/functoweb) — which uses PyTypeInput as its core engine.
 
 ---
 
