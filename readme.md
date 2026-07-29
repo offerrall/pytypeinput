@@ -1,3 +1,14 @@
+> [!WARNING]
+> **This project is discontinued and no longer maintained.**
+>
+> It has been superseded by
+> [**pytypehint**](https://github.com/offerrall/pytypehint), a full rewrite of
+> the same idea: no pydantic dependency, a stricter type catalog and a real
+> `Signature` contract. New projects should use `pytypehint`;
+> [FuncToWeb](https://github.com/offerrall/functoweb) 2.0 already runs on it.
+>
+> This repository stays online only as a reference for existing installations.
+
 # PyTypeInput 1.0.2
 
 [![PyPI version](https://img.shields.io/pypi/v/pytypeinput)](https://pypi.org/project/pytypeinput/)
